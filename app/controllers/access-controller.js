@@ -19,18 +19,15 @@ module.exports = function(app){
     },function(req, res){
         console.log(req.query['tpl']);
         //渲染模版，返回结果
-        fs.readFile(__dirname.substr(0,__dirname.length-15) + 'static/tpl/blue/index.html','utf-8', function (err, data) {
-            if (err) throw err;
-            console.log(data);
-            var template = handlebars.compile(data);
-            var result = template({
-                name:'miemiedev',
-                highlight:true,
-                title:'哈哈哈',
-                pubDate:'08-15',
-                basePath: 'http://'+req.host+':3000'
-            })
-            res.jsonp({ result: result });
-        });
+        var tpl = fs.readFileSync(__dirname.substr(0,__dirname.length-15) + 'static/1tpl/blue/index.html','utf-8');
+        var template = handlebars.compile(tpl);
+        var result = template({
+            name:'miemiedev',
+            highlight:true,
+            title:'哈哈哈',
+            pubDate:'08-15',
+            basePath: 'http://'+req.host+':3000'
+        })
+        res.jsonp({ result: result });
     });
 }
