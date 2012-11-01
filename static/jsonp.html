@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>JSONP Echo Client</title>
+    <meta charset="UTF-8" />
+    <script>
+        "use strict";
+        var head = document.getElementsByTagName('head')[0];
+        var script = document.createElement("script");
+        function jsonp(url) {
+            script.setAttribute("src", url);
+            head.appendChild(script);
+        }
+
+        function jsonpCallback(data) {
+            document.getElementById("response").innerHTML = data;
+            head.removeChild(script);
+        }
+        jsonp('http://investclick.cloudfoundry.com/jsonp');
+        //jsonp("http://www.cjihrig.com/development/jsonp/jsonp.php?callback=jsonpCallback&message=Hello");
+        //jsonp("http://www.geonames.org/postalCodeLookupJSON?postalcode=15261&country=US&callback=jsonpCallback");
+        //jsonp("http://api.twitter.com/1/users/show.json?screen_name=cjihrig&callback=jsonpCallback");
+
+    </script>
+</head>
+<body>
+<span id="response"></span>
+</body>
+</html>
