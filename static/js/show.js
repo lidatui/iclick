@@ -11,6 +11,6 @@ QLZQ.show = function(elementId){
 };
 
 QLZQ.callback = function(data){
-    document.getElementById(QLZQ.elementId).innerHTML = data;
+    document.getElementById(QLZQ.elementId).innerHTML = data.result;
     QLZQ.head.removeChild(QLZQ.script);
 };
