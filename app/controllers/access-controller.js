@@ -19,7 +19,13 @@ module.exports = function(app){
             var callback = req.query["callback"];
             var tpl = [ callback, '(\'', data, '\')'];
             var template = handlebars.compile(tpl.join(''));
-            var result = template({name:'miemiedev',highlight:true,title:'哈哈哈',pubDate:'08-15'})
+            var result = template({
+                name:'miemiedev',
+                highlight:true,
+                title:'哈哈哈',
+                pubDate:'08-15',
+                basePath: 'http://'+req.host+':3000'
+            })
             res.write(result);
             res.end();
         });
