@@ -4,10 +4,17 @@ module.exports = function(app){
     var dateFormat = require('dateformat');
     var fs = require('fs');
     app.get('/show', function(req, res, next){
+        //访问权限
+        req.query.tpl = {name:'blue'};
         var url = req.query['url'];
         console.log('request url: ' + url);
         next();
+    },function(req, res, next){
+       //查找ip位置，入库
+        next();
     },function(req, res){
+        console.log(req.query['tpl']);
+        //渲染模版，返回结果
         fs.readFile(__dirname + '../../../static/tpl/blue/index.html','utf-8', function (err, data) {
             if (err) throw err;
             data = data.replace( /\r|\n/ig , '' ); //去除换行及回车
