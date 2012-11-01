@@ -11,6 +11,10 @@ module.exports = function(app){
         next();
     },function(req, res, next){
        //查找ip位置，入库
+        var  ipAddress = req.headers['x-cluster-client-ip'] ;
+        if(!ipAddress){
+            ipAddress = req.connection.remoteAddress;
+        }
         next();
     },function(req, res){
         console.log(req.query['tpl']);
