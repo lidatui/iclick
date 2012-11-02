@@ -59,8 +59,8 @@ block script
                 url: 'articles',
                 root: 'items',
                 cols: [
-                    {title:'#行号', name:'rowNum',width: 50, align:'center',lockWidth: true},
-                    {title:'发布时间', name:'_id',width: 150, align:'center',lockWidth: true, renderer: function(val){
+                    {title:'#行号', name:'rowNum',width: 100, align:'center',lockWidth: true},
+                    {title:'发布时间', name:'_id',width: 200, align:'center',lockWidth: true, renderer: function(val){
                         return getItemCreateTime(val);
                     }},
                     {title:'内容连接 (高亮为红色)', name:'title',align:'left',renderer: function(val, item){
