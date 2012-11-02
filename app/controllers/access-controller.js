@@ -9,14 +9,17 @@ module.exports = function(app){
     var IpInfo = mongoose.model('IpInfo');
     var Access = mongoose.model('Access');
     app.get('/show', function(req, res, next){
+        var access = new Access();
+        req.query['access'] = access;
         //访问权限
         var url = req.query['url'];
+        access.url = url;
         console.log('request url: ' + url);
         next();
     },function(req, res, next){
        //查找ip位置
-        var access = new Access();
-        req.query['access'] = access;
+        var access = req.query['access'];
+
         var  ipAddress = req.headers['x-cluster-client-ip'] ;
         if(!ipAddress){
             ipAddress = req.connection.remoteAddress;
@@ -39,7 +42,7 @@ module.exports = function(app){
                 http.request(options,function(reqLookup) {
                     reqLookup.on('data', function (ipData) {
                         var ipResult = JSON.parse(ipData);
-                        console.log(ipResult);
+                        console.log('ip lookup: %s',ipData);
                         if(ipResult.ret != -1){
                             var newIpInfo = new IpInfo(ipResult);
                             newIpInfo.startNum = dot2num(ipResult.start);
@@ -68,7 +71,7 @@ module.exports = function(app){
         next();
     },function(req, res, next){
         //存储
-        console.log(req.query['access']);
+        console.log('access: %s',req.query['access']);
         var access = req.query['access'];
         access.save(function(err){
             if(err) return next(err);
