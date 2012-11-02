@@ -1,0 +1,192 @@
+html,
+button,
+input,
+select,
+textarea {
+    color: #5c5c5c;
+    font-family: "微软雅黑", helvetica, arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+body {
+    font-family: "微软雅黑", helvetica, arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #5c5c5c;
+}
+a {color:#5c5c5c; text-decoration:none; }
+
+a { blr:expression(this.onFocus=this.blur()) } /*针对 IE*/
+a { outline:none; } /*针对firefox等*/
+
+a:hover { color:#5c5c5c; text-decoration:underline; cursor:pointer;}
+
+.banner{
+    height: 90px;
+    background: url(../img/mainNav_bg.png) repeat-x;
+    border-bottom: 1px solid #445c71;
+}
+.banner .bannerContent{
+    position: relative;
+    width: 960px;
+    margin: 0 auto;
+}
+.banner .bannerContent .logo{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    display: block;
+    line-height: 90px;
+    font-family: '楷体';
+    font-size: 30px;
+    font-weight: bold;
+    color: #fff;
+}
+.banner ul{
+    margin: 0 0 0 220px;
+    padding: 0;
+}
+.banner ul li{
+    float: left;
+    list-style: none;
+}
+
+.banner ul li a {
+    display: block;
+    width: 90px;
+    line-height: 90px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+}
+
+.banner ul li a.selected{
+    background: url(../img/mainNav_selected_bg.png) no-repeat;
+}
+
+.nav {
+    height: 98px;
+    background: url(../img/subNav_bg.png) repeat-x;
+}
+
+.nav .navContent{
+    position: relative;
+    width: 960px;
+    margin: 0 auto;
+}
+.nav .navContent .header {
+
+}
+.nav .navContent .header h1{
+    margin: 0;
+    padding: 0;
+    font-size: 30px;
+    line-height: 69px;
+}
+
+.tabs{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    top: 1px;
+}
+
+.tabs li{
+    float: left;
+}
+
+
+.tabs li a{
+    display: block;
+    line-height: 26px;
+    padding: 0px 10px;
+    border: 1px solid #b8bcc0;
+    color: #55748e;
+    background: url('../img/tabs_bg.png') repeat-x;
+    margin-right: 3px;
+    -webkit-border-top-left-radius: 3px;
+    -webkit-border-top-right-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+.tabs li a:hover{
+    text-decoration: none;
+}
+
+.tabs li a.selected{
+    background: #fff;
+    border-bottom: 1px solid #fff;
+    color: #5c5c5c;
+}
+
+.nav .navContent .login{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 285px;
+    height: 98px;
+    line-height: 23px;
+}
+.nav .navContent .login h2{
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    line-height: 50px;
+}
+
+.nav .navContent .login .role{
+    margin: 0 5px;
+    font-weight: bold;
+}
+
+.nav .navContent .login a {
+    cursor: pointer;
+}
+
+.nav .navContent .login .split{
+    margin: 0 5px;
+}
+
+.main{
+    position: relative;
+    width: 960px;
+    margin: 0 auto;
+}
+
+.button {
+    border-top: 1px solid #85a6b6;
+    background: #4d6c83;
+    background: -webkit-gradient(linear, left top, left bottom, from(#61859d), to(#4d6c83));
+    background: -webkit-linear-gradient(top, #61859d, #4d6c83);
+    background: -moz-linear-gradient(top, #61859d, #4d6c83);
+    background: -ms-linear-gradient(top, #61859d, #4d6c83);
+    background: -o-linear-gradient(top, #61859d, #4d6c83);
+    padding: 5px 10px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+    -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+    box-shadow: rgba(0,0,0,1) 0 1px 0;
+    text-shadow: rgba(0,0,0,.4) 0 1px 0;
+    color: white;
+    font-size: 11px;
+    font-family: Helvetica, Arial, Sans-Serif;
+    text-decoration: none;
+    vertical-align: middle;
+}
+.button:hover {
+    border-top-color: #28597a;
+    background: #28597a;
+    color: #ccc;
+}
+.button:active {
+    border-top-color: #1b435e;
+    background: #1b435e;
+}

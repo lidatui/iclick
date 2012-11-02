@@ -1,0 +1,190 @@
+extends ../layout
+block style
+    link(rel='stylesheet', href='/js/fastGrid/fastGrid.css')
+block body
+    include ../banner.jade
+    nav.nav
+        div.navContent
+            div.header
+                h1 内容管理
+                ul.tabs
+                    li: a.selected 投资一点通
+            include ../login
+    div.main
+        section
+            p 描述
+            div.row-fluid
+                div.span10
+                    div#articleTable.table
+                div.span2
+                    div#tzydtModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="tzydtLabel",aria-hidden="true")
+                        div.modal-header
+                            button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+                            h3#tzydtLabel 投资一点通-属性
+                        div.modal-body
+                            div.alert.alert-error.hide 一切正常
+                            form.form-horizontal
+                                div.control-group
+                                    label.control-label(for="tzydtTitle") 标题
+                                    div.controls
+                                        input#tzydtTitle(type="text",placeholder="标题")
+                                        span.help-inline.hide 标题不能为空.
+                                div.control-group
+                                    label.control-label(for="tzydtTargetUrl") 目标地址
+                                    div.controls
+                                        input#tzydtTargetUrl(type="text",placeholder="http://www.example.com")
+                                        span.help-inline.hide 目标地址不能为空.
+                                div.control-group
+                                    div.controls
+                                        label.checkbox
+                                            input#tzydtHighlight(type="checkbox")
+                                            是否高亮
+
+                        div.modal-footer
+                            button.btn(data-dismiss="modal",aria-hidden="true") 关闭
+                            button#tzydtSave.btn.btn-primary 保存
+                    button#tzydtAdd.btn.btn-block.btn-success(type="button") 添加
+                    button#tzydtEdit.btn.btn-block.btn-primary(type="button") 编辑
+                    button#tzydtRemove.btn.btn-block.btn-danger(type="button") 删除
+
+
+block script
+    script(src='/js/fastGrid/fastGrid.js')
+    script(src='/js/datejs.js')
+    script
+        $(function () {
+            $('#articleTable').fastGrid({
+                width: '100%',
+                height:'500px',
+                url: 'articles',
+                root: 'items',
+                cols: [
+                    {title:'#行号', name:'rowNum',width: 50, align:'center',lockWidth: true},
+                    {title:'发布时间', name:'_id',width: 150, align:'center',lockWidth: true, renderer: function(val){
+                        return getItemCreateTime(val);
+                    }},
+                    {title:'内容连接 (高亮为红色)', name:'title',align:'left',renderer: function(val, item){
+                        if(item.highlight){
+                            return '<a href="'+ item.targetUrl +'" style="color:#B94A48">'+ val +'</a>'
+                        }else{
+                            return '<a href="'+ item.targetUrl +'" >'+ val +'</a>';
+                        }
+                    }},
+                ],
+                fitCols: true
+            });
+            //tzydt
+            $('#tzydtAdd').on('click',function(){
+                clearTzydtForm();
+                $('#tzydtModal').removeData('item');
+                $('#tzydtModal').modal('show');
+            });
+
+            $('#tzydtEdit').on('click',function(){
+                var selected = $('#articleTable').fastGrid('selected');
+                if(!selected.length){
+                    alert('请选择一行进行编辑');
+                    return ;
+                }
+                var item = selected[0];
+                $('#tzydtTitle').val(item.title);
+                $('#tzydtTargetUrl').val(item.targetUrl);
+                $('#tzydtHighlight')[0].checked = item.highlight;
+
+                $('#tzydtModal').data('item',item);
+                $('#tzydtModal').modal('show');
+            });
+
+            $('#tzydtSave').on('click',function(){
+
+                var param = {};
+                param = $.extend(param,$('#tzydtModal').data('item'));
+                var title = $('#tzydtTitle').val();
+                var targetUrl = $('#tzydtTargetUrl').val();
+                var highlight = $('#tzydtHighlight')[0].checked;
+                if(!title || !targetUrl){
+                    if(!title){
+                        $('#tzydtTitle').parent().parent().addClass('error');
+                        $('#tzydtTitle').next().show();
+                    }
+                    if(!targetUrl){
+                        $('#tzydtTargetUrl').parent().parent().addClass('error');
+                        $('#tzydtTargetUrl').next().show();
+                    }
+                    return;
+                }
+                param = $.extend(param,{
+                    title: title,
+                    targetUrl: targetUrl,
+                    highlight: highlight ? 1: 0
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: '/manage/article/save',
+                    data: param,
+                    dataType: 'text',
+                    cache: false
+                }).done(function(result){
+                    if(param._id){
+                        $('#articleTable').fastGrid('load',{});
+                    }else{
+                        $('#articleTable').fastGrid('load',{});
+                    }
+
+                    $('#tzydtModal').modal('hide');
+                    clearTzydtForm();
+                }).fail(function(data){
+                    $('#tzydtModal .modal-body .alert-error').show().text(data.statusText + ': ' + data.responseText);
+                });
+            });
+
+            $('#tzydtRemove').on('click',function(){
+                var selected = $('#articleTable').fastGrid('selected');
+                if(!selected.length){
+                    alert('请选择一行进行编辑');
+                    return ;
+                }
+                var item = selected[0];
+                if(!confirm('你确定要删除吗?')){
+                    return;
+                }
+                $.ajax({
+                    type: 'Get',
+                    url: '/manage/article/remove',
+                    data: {
+                        _id: item._id
+                    },
+                    dataType: 'text',
+                    cache: false
+                }).done(function(result){
+                    $('#articleTable').fastGrid('load',{});
+                }).fail(function(data){
+                    console.log(data.statusText + ': ' + data.responseText);
+                });
+            });
+
+            $('#tzydtBody').on('click', 'tr', function(){
+                $('#tzydtBody tr').removeClass('warning');
+                $(this).addClass('warning');
+            });
+
+        });
+
+        function clearTzydtForm(){
+            $('#tzydtPubDate').parent().parent().removeClass('error');
+            $('#tzydtPubDate').next().hide();
+            $('#tzydtPubDate').val('');
+            $('#tzydtTitle').parent().parent().removeClass('error');
+            $('#tzydtTitle').next().hide();
+            $('#tzydtTitle').val('');
+            $('#tzydtTargetUrl').parent().parent().removeClass('error');
+            $('#tzydtTargetUrl').next().hide();
+            $('#tzydtTargetUrl').val('');
+            $('#tzydtHighlight')[0].checked = false;
+            $('#tzydtModal .modal-body .alert-error').hide();
+        }
+        function getItemCreateTime(objectId){
+            var str = objectId.toString().slice(0,8);
+            var time = parseInt(str,16) * 1000;
+            return new Date(time).toString('yyyy-MM-dd HH:mm:ss');
+        }
