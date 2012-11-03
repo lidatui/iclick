@@ -32,9 +32,10 @@ module.exports = function(app){
         });
     });
 
-    app.post('/manage/articles', function(req, res){
+    app.get('/manage/articles', function(req, res){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
-            , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
+            , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] - 1 : 0;
+
         Article
             .find({})
             .limit(pageSize)
@@ -49,7 +50,8 @@ module.exports = function(app){
                 Article.count().exec(function (err, count) {
                     res.send({
                         items: articles
-                        , pageNo: pageNo
+                        , pageNo: pageNo+1
+                        , pageSize: pageSize
                         , totalCount: count
                     });
                 })

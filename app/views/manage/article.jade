@@ -1,6 +1,7 @@
 extends ../layout
 block style
     link(rel='stylesheet', href='/js/fastGrid/fastGrid.css')
+    link(rel='stylesheet', href='/js/paginator/paginator.css')
 block body
     include ../banner.jade
     nav.nav
@@ -8,7 +9,7 @@ block body
             div.header
                 h1 内容管理
                 ul.tabs
-                    li: a.selected 投资一点通
+                    li: a.selected 列表
             include ../login
     div.main
         section
@@ -16,11 +17,13 @@ block body
             div.row-fluid
                 div.span10
                     div#articleTable.table
+                    div(style='text-align:right;')
+                        div#articlePaginator
                 div.span2
                     div#tzydtModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="tzydtLabel",aria-hidden="true")
                         div.modal-header
                             button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
-                            h3#tzydtLabel 投资一点通-属性
+                            h3#tzydtLabel 内容-属性
                         div.modal-body
                             div.alert.alert-error.hide 一切正常
                             form.form-horizontal
@@ -50,6 +53,7 @@ block body
 
 block script
     script(src='/js/fastGrid/fastGrid.js')
+    script(src='/js/paginator/paginator.js')
     script(src='/js/datejs.js')
     script
         $(function () {
@@ -57,7 +61,9 @@ block script
                 width: '100%',
                 height:'500px',
                 url: 'articles',
+                method: 'get',
                 root: 'items',
+
                 cols: [
                     {title:'#行号', name:'rowNum',width: 100, align:'center',lockWidth: true},
                     {title:'发布时间', name:'_id',width: 200, align:'center',lockWidth: true, renderer: function(val){
@@ -71,7 +77,12 @@ block script
                         }
                     }},
                 ],
-                fitCols: true
+                fitCols: true,
+                paginator : $('#articlePaginator').paginator({
+                    style: 'plain',
+                    pageSize: 50,
+                    pageSizeList: [50, 100, 200]
+                })
             });
             //tzydt
             $('#tzydtAdd').on('click',function(){

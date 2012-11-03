@@ -57,7 +57,7 @@ module.exports = function(app){
                         }
                     });
                 }).on('error', function(err) {
-                    console.log('problem with request: ' + e.message);
+                    console.log('problem with request: ' + err.message);
                     next(err);
                 }).end();
             }
