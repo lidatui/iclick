@@ -1,13 +1,13 @@
 extends ../layout
 block body
-    include ../banner.jade
+    include ../includes/banner
     nav.nav
         div.navContent
             div.header
                 h1 访问控制
                 ul.tabs
                     li: a.selected 列表
-            include ../login
+            include ../includes/login
     div.main
         section
             p 描述
