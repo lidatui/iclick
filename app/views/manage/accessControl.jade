@@ -1,0 +1,386 @@
+extends ../layout
+block style
+    link(rel='stylesheet', href='/js/fastGrid/fastGrid.css')
+    link(rel='stylesheet', href='/js/paginator/paginator.css')
+block body
+    include ../banner.jade
+    nav.nav
+        div.navContent
+            div.header
+                h1 访问控制
+                ul.tabs
+                    li: a.selected 列表
+            include ../login
+    div.main
+        section
+            p 描述
+            div.row-fluid
+                div.span10
+                    table.table.table-bordered.table-striped
+                        thead
+                            tr
+                                th(style="text-align: center;") #行号
+                                th(style="text-align: left;") 公司名称
+                                th(style="text-align: left;") 站点名称
+                                th(style="text-align: left;") 站点域名
+                                th(style="text-align: left;") 设置模版
+                        tbody#siteBody
+                            tr
+                                td 1
+                                td 2
+                                td 3
+                                td 4
+                                td 5
+                    div.pagination.pagination-right
+                        ul#sitePaginator
+
+                div.span2
+                    div#siteModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="siteLabel",aria-hidden="true")
+                        div.modal-header
+                            button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+                            h3#tplLabel 站点-属性
+                        div.modal-body
+                            div.alert.alert-error.hide 一切正常
+                            form.form-horizontal
+                                div.control-group
+                                    label.control-label(for="siteCompanyName") 公司名称
+                                    div.controls
+                                        input#siteCompanyName(type="text",placeholder="例: 齐鲁证券")
+                                        span.help-inline.hide 公司名称不能为空.
+                                div.control-group
+                                    label.control-label(for="siteName") 站点名称
+                                    div.controls
+                                        input#siteName(type="text",placeholder="例: 融易网")
+                                        span.help-inline.hide 站点名称不得为空.
+                                div.control-group
+                                    label.control-label(for="siteHost") 站点域名
+                                    div.controls
+                                        input#siteHost(type="text",placeholder="例: 95538.cn")
+                                        span.help-inline.hide 站点域名不能为空.
+                                div.control-group
+                                    label.control-label(for="siteTemplate") 设置模版
+                                    div.controls
+                                        select#siteTemplate
+                                        span.help-inline.hide 请选择一个模版.
+                                        div#siteTplPreView(style="padding-top:5px;")
+
+                        div.modal-footer
+                            button.btn(data-dismiss="modal",aria-hidden="true") 关闭
+                            button#siteSave.btn.btn-primary 保存
+                    button#siteAdd.btn.btn-block.btn-success(type="button") 添加
+                    button#siteEdit.btn.btn-block.btn-primary(type="button") 编辑
+                    button#siteRemove.btn.btn-block.btn-danger(type="button") 删除
+
+
+block script
+    script(src='/js/fastGrid/fastGrid.js')
+    script(src='/js/paginator/paginator.js')
+    script(src='/js/datejs.js')
+    script
+        $(function () {
+            //------------------site
+            $('#siteAdd').on('click',function(){
+                clearSiteForm();
+                $('#siteModal').removeData('item');
+                $('#siteModal').modal('show');
+            });
+
+            $('#siteTemplate').on('change',function(){
+                var item = $('#siteTemplate option:selected').data('item');
+                if(item){
+                    $('#siteTplPreView').html(item.preView);
+                }else{
+                    $('#siteTplPreView').html('');
+                }
+            });
+
+            $('#siteEdit').on('click',function(){
+                var tr = $('#siteBody tr.warning')[0];
+                if(!tr){
+                    alert('请选择一行进行编辑');
+                    return ;
+                }
+                var item = $.data(tr,'item');
+                $('#siteCompanyName').val(item.companyName);
+                $('#siteName').val(item.siteName);
+                $('#siteHost').val(item.host);
+                $('#siteTemplate').val(item.template).change();
+
+                $('#siteModal').data('item',item);
+                $('#siteModal').modal('show');
+            });
+
+            $('#siteSave').on('click',function(){
+
+                var param = {};
+                param = $.extend(param,$('#siteModal').data('item'));
+                var companyName = $('#siteCompanyName').val();
+                var siteName = $('#siteName').val();
+                var host = $('#siteHost').val();
+                var item = $('#siteTemplate option:selected').data('item');
+
+                if(!companyName || !siteName || !host || !item){
+                    if(!companyName){
+                        $('#siteCompanyName').parent().parent().addClass('error');
+                        $('#siteCompanyName').next().show();
+                    }
+                    if(!siteName){
+                        $('#siteName').parent().parent().addClass('error');
+                        $('#siteName').next().show();
+                    }
+                    if(!host){
+                        $('#siteHost').parent().parent().addClass('error');
+                        $('#siteHost').next().show();
+                    }
+                    if(!item){
+                        $('#siteTemplate').parent().parent().addClass('error');
+                        $('#siteTemplate').next().show();
+                    }
+                    return;
+                }
+                param = $.extend(param,{
+                    companyName: companyName,
+                    siteName: siteName,
+                    host: host,
+                    template: item._id
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: '/manage/accessControl/save',
+                    data: param,
+                    dataType: 'text',
+                    cache: false
+                }).done(function(result){
+                    if(param._id){
+                        loadSite();
+                    }else{
+                        loadSite(0);
+                    }
+
+                    $('#siteModal').modal('hide');
+                    clearSiteForm();
+                }).fail(function(data){
+                    $('#siteModal .modal-body .alert-error').show().text(data.statusText + ': ' + data.responseText);
+                });
+            });
+
+            $('#siteRemove').on('click',function(){
+                var tr = $('#siteBody tr.warning')[0];
+                if(!tr){
+                    alert('请选择一行进行删除');
+                    return ;
+                }
+                var item = $.data(tr,'item');
+                if(!confirm('你确定要删除吗?')){
+                    return;
+                }
+                $.ajax({
+                    type: 'Get',
+                    url: '/manage/accessControl/remove',
+                    data: {
+                        _id: item._id
+                    },
+                    dataType: 'text',
+                    cache: false
+                }).done(function(result){
+                    loadSite();
+                }).fail(function(data){
+                    console.log(data.statusText + ': ' + data.responseText);
+                });
+            });
+
+            $('#siteBody').on('click', 'tr', function(){
+                $('#siteBody tr').removeClass('warning');
+                $(this).addClass('warning');
+            });
+            loadSite(0,10);
+            loadTpl();
+        });
+        function clearSiteForm(){
+            $('#siteCompanyName').parent().parent().removeClass('error');
+            $('#siteCompanyName').next().hide();
+            $('#siteCompanyName').val('');
+            $('#siteName').parent().parent().removeClass('error');
+            $('#siteName').next().hide();
+            $('#siteName').val('');
+            $('#siteHost').parent().parent().removeClass('error');
+            $('#siteHost').next().hide();
+            $('#siteHost').val('');
+            $('#siteTemplate').parent().parent().removeClass('error');
+            $('#siteTemplate').next().hide();
+            $('#siteTemplate').val('').change();
+            $('#siteModal .modal-body .alert-error').hide();
+        }
+
+        function getItemCreateTime(objectId){
+            var str = objectId.toString().slice(0,8);
+            var time = parseInt(str,16) * 1000;
+            return new Date(time).toString('yyyy-MM-dd HH:mm:ss');
+        }
+
+        function loadSite(pageNo, pageSize){
+
+            if(pageNo >= 0){
+                $('#sitePaginator').data('pageNo',pageNo);
+            }else{
+                pageNo = $('#sitePaginator').data('pageNo');
+                pageNo = pageNo >=0 ? pageNo : 0;
+            }
+            if(pageSize >= 1){
+                $('#sitePaginator').data('pageSize',pageSize);
+            }else{
+                pageSize = $('#sitePaginator').data('pageSize');
+                pageSize = pageSize >=1 ? pageSize : 10;
+            }
+
+            $.ajax({
+                url: '/manage/accessControl/list',
+                dataType: 'json',
+                data: {
+                pageNo: pageNo,
+                pageSize: pageSize
+                },
+                cache: false
+            }).done(function(result){
+                renderPaginator('sitePaginator', pageNo,result.totalCount,pageSize,loadSite);
+
+                var trHtmls = [];
+                $.each(result.items, function(index,item){
+                    trHtmls.push('<tr>');
+                    trHtmls.push('<td style="width: 50px;text-align: center;">');
+                    trHtmls.push(pageNo * pageSize +index+1);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push(item.companyName);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push(item.siteName);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push(item.host);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push(item.templateName);
+                    trHtmls.push('</td>');
+                    trHtmls.push('</tr>');
+                });
+
+                $('#siteBody').empty().html(trHtmls.join(''));
+
+                $.each($('#siteBody tr'), function(index, tr){
+                    $.data(tr,'item', result.items[index]);
+                });
+            });
+        }
+
+        function loadTpl(){
+
+            $.ajax({
+            url: '/manage/template/list',
+            dataType: 'json',
+            cache: false
+            }).done(function(items){
+
+                var trHtmls = [];
+                var optionHtmls = ['<option>选择...</option>'];
+                $.each(items, function(index,item){
+                    trHtmls.push('<tr>');
+                    trHtmls.push('<td style="width: 50px;text-align: center;">');
+                    trHtmls.push(index+1);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="width: 150px;text-align: center;">');
+                    trHtmls.push(item.name);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push(item.preView);
+                    trHtmls.push('</td>');
+                    trHtmls.push('</tr>');
+
+                    optionHtmls.push('<option value="');
+                    optionHtmls.push(item._id);
+                    optionHtmls.push('">');
+                    optionHtmls.push(item.name);
+                    optionHtmls.push('</option>');
+
+                });
+
+
+                $('#siteTemplate').empty().html(optionHtmls.join(''));
+                $.each($('#siteTemplate option'), function(index, option){
+                    $.data(option,'item', items[index-1]);
+                });
+            });
+        }
+
+
+        function renderPaginator(ulId,pageNo, totalCount, pageSize ,load){
+            var $ul = $('#'+ulId).empty();
+
+            var totalPage = totalCount % pageSize === 0 ? parseInt(totalCount/pageSize) : parseInt(totalCount/pageSize) + 1;
+            totalPage = totalPage ? totalPage : 0;
+            if(totalPage === 0){
+                pageNo = 0;
+            }else if(pageNo > totalPage){
+                pageNo = totalPage;
+            }else if(pageNo < 1 && totalPage != 0){
+                pageNo = 0;
+            }
+            //
+            var $prev = $('<li><a>«</a></li>');
+            if(pageNo<=0){
+                $prev.addClass('disabled');
+            }else{
+                $prev.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo-1,pageSize)
+                });
+            }
+            $ul.append($prev);
+            /////
+            var list = [1];
+            for(var i= 0; i < 5; i++){
+                var no = pageNo - 2 + i;
+
+                if(i==0 && no > 3){
+                    list.push('...');
+                }
+                if(no > 1 && no <= totalPage-1){
+                    list.push(no);
+                }
+            }
+
+            if(pageNo+2 < totalPage-1){
+                list.push('...');
+            }
+            if(totalPage>1){
+                list.push(totalPage);
+            }
+
+            $.each(list, function(index, item){
+                var $li = $('<li><a></a></li>');
+                if(item === '...'){
+                    $li.find('a').text('...');
+                }else if(item === pageNo+1){
+                    $li.addClass('active').find('a').text(item);
+                }else{
+                    $li.find('a').text(item).prop('title','第'+item+'页').on('click', function(e){
+                        e.preventDefault();
+                        load(item-1,pageSize);
+                    });
+                }
+                $ul.append($li);
+            });
+
+            //
+            var $next = $('<li><a title="下一页">»</a></li>');
+            if(pageNo+1>=totalPage){
+                $next.addClass('disabled');
+            }else{
+                $next.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo+1,pageSize);
+                });
+            }
+            $ul.append($next);
+
+        }

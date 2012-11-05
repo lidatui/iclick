@@ -1,0 +1,269 @@
+extends ../layout
+block style
+    link(rel='stylesheet', href='/js/fastGrid/fastGrid.css')
+    link(rel='stylesheet', href='/js/paginator/paginator.css')
+block body
+    include ../banner.jade
+    nav.nav
+        div.navContent
+            div.header
+                h1 内容管理
+                ul.tabs
+                    li: a.selected 列表
+            include ../login
+    div.main
+        section
+            p 描述
+            div.row-fluid
+                div.span10
+                    table.table.table-striped
+                        thead
+                            tr
+                                th(style="text-align: center;") #行号
+                                th(style="text-align: center;") 名称
+                                th(style="text-align: left;") 预览
+                        tbody#tplBody
+                            tr
+                                td 1
+                                td 2
+                                td 3
+                div.span2
+                    div#tplModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="tplLabel",aria-hidden="true")
+                        div.modal-header
+                            button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+                            h3#tplLabel 模版-属性
+                        div.modal-body
+                            div.alert.alert-error.hide 一切正常
+                            form.form-horizontal
+                                div.control-group
+                                    label.control-label(for="tplName") 模版名称
+                                    div.controls
+                                        input#tplName(type="text",placeholder="模版名称")
+                                        span.help-inline.hide 模版名称不得为空.
+                                div.control-group
+                                    label.control-label(for="tzydtContent") 模板路径
+                                    div.controls
+                                        input#tplContent.span12(type="text",placeholder="blue/index.html")
+                                        span.help-inline.hide 模板内容不能为空.
+
+                        div.modal-footer
+                            button.btn(data-dismiss="modal",aria-hidden="true") 关闭
+                            button#tplSave.btn.btn-primary 保存
+                    button#tplAdd.btn.btn-block.btn-success(type="button") 添加
+                    button#tplEdit.btn.btn-block.btn-primary(type="button") 编辑
+                    button#tplRemove.btn.btn-block.btn-danger(type="button") 删除
+
+
+block script
+    script(src='/js/fastGrid/fastGrid.js')
+    script(src='/js/paginator/paginator.js')
+    script(src='/js/datejs.js')
+    script
+        $(function () {
+            //------tpl
+            $('#tplAdd').on('click',function(){
+                clearTplForm();
+                $('#tplModal').removeData('item');
+                $('#tplModal').modal('show');
+            });
+            $('#tplEdit').on('click',function(){
+                var tr = $('#tplBody tr.warning')[0];
+                if(!tr){
+                    alert('请选择一行进行编辑');
+                    return ;
+                }
+                var item = $.data(tr,'item');
+                $('#tplName').val(item.name);
+                $('#tplContent').val(item.path);
+                $('#tplModal').data('item',item);
+                $('#tplModal').modal('show');
+            });
+            $('#tplSave').on('click',function(){
+                var param = {};
+                param = $.extend(param,$('#tplModal').data('item'));
+                var name = $('#tplName').val();
+                var path = $('#tplContent').val();
+                if(!name || !path){
+                    if(!name){
+                        $('#tplName').parent().parent().addClass('error');
+                        $('#tplName').next().show();
+                    }
+                    if(!path){
+                        $('#tplContent').parent().parent().addClass('error');
+                        $('#tplContent').next().show();
+                    }
+                    return;
+                }
+                param = $.extend(param,{
+                    name: name,
+                    path: path
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: '/manage/template/save',
+                    data: param,
+                    dataType: 'text',
+                    cache: false
+                }).done(function(result){
+                    loadTpl();
+                    $('#tplModal').modal('hide');
+                    clearTplForm();
+                }).fail(function(data){
+                    $('#tplModal .modal-body .alert-error').show().text(data.statusText + ': ' + data.responseText);
+                });
+            });
+            $('#tplRemove').on('click',function(){
+                var tr = $('#tplBody tr.warning')[0];
+                if(!tr){
+                    alert('请选择一行进行删除');
+                    return ;
+                }
+                var item = $.data(tr,'item');
+                if(!confirm('你确定要删除吗?')){
+                    return;
+                }
+                $.ajax({
+                    type: 'Get',
+                    url: '/manage/template/remove',
+                    data: {
+                        _id: item._id
+                    },
+                    dataType: 'text',
+                    cache: false
+                }).done(function(result){
+                    loadTpl();
+                }).fail(function(data){
+                    console.log(data.statusText + ': ' + data.responseText);
+                });
+            });
+            $('#tplBody').on('click', 'tr', function(){
+                $('#tplBody tr').removeClass('warning');
+                $(this).addClass('warning');
+            });
+            loadTpl();
+
+        });
+        function clearTplForm(){
+            $('#tplName').parent().parent().removeClass('error');
+            $('#tplName').next().hide();
+            $('#tplName').val('');
+            $('#tplContent').parent().parent().removeClass('error');
+            $('#tplContent').next().hide();
+            $('#tplContent').val('');
+            $('#tplModal .modal-body .alert-error').hide();
+        }
+
+        function getItemCreateTime(objectId){
+            var str = objectId.toString().slice(0,8);
+            var time = parseInt(str,16) * 1000;
+            return new Date(time).toString('yyyy-MM-dd HH:mm:ss');
+        }
+
+        function loadTpl(){
+
+            $.ajax({
+            url: '/manage/template/list',
+            dataType: 'json',
+            cache: false
+            }).done(function(items){
+
+                var trHtmls = [];
+                var optionHtmls = ['<option>选择...</option>'];
+                $.each(items, function(index,item){
+                    trHtmls.push('<tr>');
+                    trHtmls.push('<td style="width: 50px;text-align: center;">');
+                    trHtmls.push(index+1);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="width: 150px;text-align: center;">');
+                    trHtmls.push(item.name);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push(item.preView);
+                    trHtmls.push('</td>');
+                    trHtmls.push('</tr>');
+
+                    optionHtmls.push('<option value="');
+                    optionHtmls.push(item._id);
+                    optionHtmls.push('">');
+                    optionHtmls.push(item.name);
+                    optionHtmls.push('</option>');
+                });
+
+                $('#tplBody').empty().html(trHtmls.join(''));
+
+                $.each($('#tplBody tr'), function(index, tr){
+                    $.data(tr,'item', items[index]);
+                });
+
+                $('#siteTemplate').empty().html(optionHtmls.join(''));
+                $.each($('#siteTemplate option'), function(index, option){
+                    $.data(option,'item', items[index-1]);
+                });
+            });
+        }
+
+        function renderPaginator(ulId,pageNo, totalCount, pageSize ,load){
+            var $ul = $('#'+ulId).empty();
+            var totalPage = totalCount % pageSize === 0 ? parseInt(totalCount/pageSize) : parseInt(totalCount/pageSize) + 1;
+            totalPage = totalPage ? totalPage : 0;
+            if(totalPage === 0){
+                pageNo = 0;
+            }else if(pageNo > totalPage){
+                pageNo = totalPage;
+            }else if(pageNo < 1 && totalPage != 0){
+                pageNo = 0;
+            }
+            //
+            var $prev = $('<li><a>«</a></li>');
+            if(pageNo<=0){
+                $prev.addClass('disabled');
+            }else{
+                $prev.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo-1,pageSize)
+                });
+            }
+            $ul.append($prev);
+            /////
+            var list = [1];
+            for(var i= 0; i < 5; i++){
+                var no = pageNo - 2 + i;
+                if(i==0 && no > 3){
+                    list.push('...');
+                }
+                if(no > 1 && no <= totalPage-1){
+                    list.push(no);
+                }
+            }
+            if(pageNo+2 < totalPage-1){
+                list.push('...');
+            }
+            if(totalPage>1){
+                list.push(totalPage);
+            }
+            $.each(list, function(index, item){
+                var $li = $('<li><a></a></li>');
+                if(item === '...'){
+                    $li.find('a').text('...');
+                }else if(item === pageNo+1){
+                    $li.addClass('active').find('a').text(item);
+                }else{
+                    $li.find('a').text(item).prop('title','第'+item+'页').on('click', function(e){
+                        e.preventDefault();
+                        load(item-1,pageSize);
+                    });
+                }
+                $ul.append($li);
+            });
+            //
+            var $next = $('<li><a title="下一页">»</a></li>');
+            if(pageNo+1>=totalPage){
+                $next.addClass('disabled');
+            }else{
+                $next.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo+1,pageSize);
+                });
+            }
+            $ul.append($next);
+        }

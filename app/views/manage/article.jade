@@ -1,7 +1,5 @@
 extends ../layout
-block style
-    link(rel='stylesheet', href='/js/fastGrid/fastGrid.css')
-    link(rel='stylesheet', href='/js/paginator/paginator.css')
+
 block body
     include ../banner.jade
     nav.nav
@@ -16,14 +14,40 @@ block body
             p 描述
             div.row-fluid
                 div.span10
-                    div#articleTable.table
-                    div(style='text-align:right;')
-                        div#articlePaginator
+                    table.table.table-bordered.table-striped
+                        thead
+                            tr
+                                th(style="text-align: center;") #行号
+                                th(style="text-align: center;") 发布时间
+                                th 内容连接 (高亮为红色)
+                        tbody#tzydtBody
+                            tr
+                                td 1
+                                td 2012-09-30
+                                td 你知道吗
+                    div.pagination.pagination-right
+                        ul#tzydtPaginator
+                            li
+                                a(href="#") «
+                            li
+                                a(href="#") 1
+                            li
+                                a(href="#") 2
+                            li
+                                a(href="#") 3
+                            li
+                                a(href="#") 4
+                            li
+                                a ...
+                            li
+                                a(href="#") 12
+                            li
+                                a(href="#") »
                 div.span2
                     div#tzydtModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="tzydtLabel",aria-hidden="true")
                         div.modal-header
                             button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
-                            h3#tzydtLabel 内容-属性
+                            h3#tzydtLabel 投资一点通-属性
                         div.modal-body
                             div.alert.alert-error.hide 一切正常
                             form.form-horizontal
@@ -41,8 +65,7 @@ block body
                                     div.controls
                                         label.checkbox
                                             input#tzydtHighlight(type="checkbox")
-                                            是否高亮
-
+                                            span 是否高亮
                         div.modal-footer
                             button.btn(data-dismiss="modal",aria-hidden="true") 关闭
                             button#tzydtSave.btn.btn-primary 保存
@@ -52,110 +75,80 @@ block body
 
 
 block script
-    script(src='/js/fastGrid/fastGrid.js')
-    script(src='/js/paginator/paginator.js')
     script(src='/js/datejs.js')
     script
         $(function () {
-            $('#articleTable').fastGrid({
-                width: '100%',
-                height:'500px',
-                url: 'articles',
-                method: 'get',
-                root: 'items',
-
-                cols: [
-                    {title:'#行号', name:'rowNum',width: 100, align:'center',lockWidth: true},
-                    {title:'发布时间', name:'_id',width: 200, align:'center',lockWidth: true, renderer: function(val){
-                        return getItemCreateTime(val);
-                    }},
-                    {title:'内容连接 (高亮为红色)', name:'title',align:'left',renderer: function(val, item){
-                        if(item.highlight){
-                            return '<a href="'+ item.targetUrl +'" style="color:#B94A48">'+ val +'</a>'
-                        }else{
-                            return '<a href="'+ item.targetUrl +'" >'+ val +'</a>';
-                        }
-                    }},
-                ],
-                fitCols: true,
-                paginator : $('#articlePaginator').paginator({
-                    style: 'plain',
-                    pageSize: 50,
-                    pageSizeList: [50, 100, 200]
-                })
-            });
-            //tzydt
             $('#tzydtAdd').on('click',function(){
+            clearTzydtForm();
+            $('#tzydtModal').removeData('item');
+            $('#tzydtModal').modal('show');
+        });
+
+        $('#tzydtEdit').on('click',function(){
+            var tr = $('#tzydtBody tr.warning')[0];
+            if(!tr){
+                alert('请选择一行进行编辑');
+                return ;
+            }
+            var item = $.data(tr,'item');
+            $('#tzydtTitle').val(item.title);
+            $('#tzydtTargetUrl').val(item.targetUrl);
+            $('#tzydtHighlight')[0].checked = item.highlight;
+
+            $('#tzydtModal').data('item',item);
+            $('#tzydtModal').modal('show');
+        });
+
+        $('#tzydtSave').on('click',function(){
+
+            var param = {};
+            param = $.extend(param,$('#tzydtModal').data('item'));
+            var title = $('#tzydtTitle').val();
+            var targetUrl = $('#tzydtTargetUrl').val();
+            var highlight = $('#tzydtHighlight')[0].checked;
+            if(!title || !targetUrl){
+                if(!title){
+                    $('#tzydtTitle').parent().parent().addClass('error');
+                    $('#tzydtTitle').next().show();
+                }
+                if(!targetUrl){
+                    $('#tzydtTargetUrl').parent().parent().addClass('error');
+                    $('#tzydtTargetUrl').next().show();
+                }
+                return;
+            }
+            param = $.extend(param,{
+                title: title,
+                targetUrl: targetUrl,
+                highlight: highlight ? 1: 0
+            });
+            $.ajax({
+                type: 'POST',
+                url: '/manage/article/save',
+                data: param,
+                dataType: 'text',
+                cache: false
+            }).done(function(result){
+                if(param._id){
+                    loadTzydt();
+                }else{
+                    loadTzydt(0);
+                }
+
+                $('#tzydtModal').modal('hide');
                 clearTzydtForm();
-                $('#tzydtModal').removeData('item');
-                $('#tzydtModal').modal('show');
-            });
-
-            $('#tzydtEdit').on('click',function(){
-                var selected = $('#articleTable').fastGrid('selected');
-                if(!selected.length){
-                    alert('请选择一行进行编辑');
-                    return ;
-                }
-                var item = selected[0];
-                $('#tzydtTitle').val(item.title);
-                $('#tzydtTargetUrl').val(item.targetUrl);
-                $('#tzydtHighlight')[0].checked = item.highlight;
-
-                $('#tzydtModal').data('item',item);
-                $('#tzydtModal').modal('show');
-            });
-
-            $('#tzydtSave').on('click',function(){
-
-                var param = {};
-                param = $.extend(param,$('#tzydtModal').data('item'));
-                var title = $('#tzydtTitle').val();
-                var targetUrl = $('#tzydtTargetUrl').val();
-                var highlight = $('#tzydtHighlight')[0].checked;
-                if(!title || !targetUrl){
-                    if(!title){
-                        $('#tzydtTitle').parent().parent().addClass('error');
-                        $('#tzydtTitle').next().show();
-                    }
-                    if(!targetUrl){
-                        $('#tzydtTargetUrl').parent().parent().addClass('error');
-                        $('#tzydtTargetUrl').next().show();
-                    }
-                    return;
-                }
-                param = $.extend(param,{
-                    title: title,
-                    targetUrl: targetUrl,
-                    highlight: highlight ? 1: 0
-                });
-                $.ajax({
-                    type: 'POST',
-                    url: '/manage/article/save',
-                    data: param,
-                    dataType: 'text',
-                    cache: false
-                }).done(function(result){
-                    if(param._id){
-                        $('#articleTable').fastGrid('load',{});
-                    }else{
-                        $('#articleTable').fastGrid('load',{});
-                    }
-
-                    $('#tzydtModal').modal('hide');
-                    clearTzydtForm();
-                }).fail(function(data){
-                    $('#tzydtModal .modal-body .alert-error').show().text(data.statusText + ': ' + data.responseText);
+            }).fail(function(data){
+                $('#tzydtModal .modal-body .alert-error').show().text(data.statusText + ': ' + data.responseText);
                 });
             });
 
             $('#tzydtRemove').on('click',function(){
-                var selected = $('#articleTable').fastGrid('selected');
-                if(!selected.length){
-                    alert('请选择一行进行编辑');
+                var tr = $('#tzydtBody tr.warning')[0];
+                if(!tr){
+                    alert('请选择一行进行删除');
                     return ;
                 }
-                var item = selected[0];
+                var item = $.data(tr,'item');
                 if(!confirm('你确定要删除吗?')){
                     return;
                 }
@@ -168,7 +161,7 @@ block script
                     dataType: 'text',
                     cache: false
                 }).done(function(result){
-                    $('#articleTable').fastGrid('load',{});
+                    loadTzydt();
                 }).fail(function(data){
                     console.log(data.statusText + ': ' + data.responseText);
                 });
@@ -179,8 +172,14 @@ block script
                 $(this).addClass('warning');
             });
 
-        });
+            loadTzydt(0,10);
 
+        });
+        function getItemCreateTime(objectId){
+            var str = objectId.toString().slice(0,8);
+            var time = parseInt(str,16) * 1000;
+            return new Date(time).toString('yyyy-MM-dd HH:mm:ss');
+        }
         function clearTzydtForm(){
             $('#tzydtPubDate').parent().parent().removeClass('error');
             $('#tzydtPubDate').next().hide();
@@ -194,8 +193,132 @@ block script
             $('#tzydtHighlight')[0].checked = false;
             $('#tzydtModal .modal-body .alert-error').hide();
         }
-        function getItemCreateTime(objectId){
-            var str = objectId.toString().slice(0,8);
-            var time = parseInt(str,16) * 1000;
-            return new Date(time).toString('yyyy-MM-dd HH:mm:ss');
+
+        function loadTzydt(pageNo, pageSize){
+
+            if(pageNo >= 0){
+                $('#tzydtPaginator').data('pageNo',pageNo);
+            }else{
+                pageNo = $('#tzydtPaginator').data('pageNo');
+                pageNo = pageNo >=0 ? pageNo : 0;
+            }
+            if(pageSize >= 1){
+                $('#tzydtPaginator').data('pageSize',pageSize);
+            }else{
+                pageSize = $('#tzydtPaginator').data('pageSize');
+                pageSize = pageSize >=1 ? pageSize : 10;
+            }
+
+            $.ajax({
+                url: '/manage/article/list',
+                dataType: 'json',
+                data: {
+                pageNo: pageNo,
+                pageSize: pageSize
+                },
+                cache: false
+            }).done(function(result){
+                renderPaginator('tzydtPaginator', pageNo,result.totalCount,pageSize,loadTzydt);
+
+                var trHtmls = [];
+                $.each(result.items, function(index,item){
+                    trHtmls.push('<tr>');
+                    trHtmls.push('<td style="width: 50px;text-align: center;">');
+                    trHtmls.push(pageNo * pageSize +index+1);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="width: 150px;text-align: center;">');
+                    trHtmls.push(getItemCreateTime(item._id));
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push('<a href="');
+                    trHtmls.push(item.targetUrl);
+                    trHtmls.push('" ');
+                    if(item.highlight){
+                        trHtmls.push('style="color: #B94A48;" ');
+                    }
+                    trHtmls.push('>');
+                    trHtmls.push(item.title);
+                    trHtmls.push('</a>');
+                    trHtmls.push('</td>');
+                    trHtmls.push('</tr>');
+                });
+
+                $('#tzydtBody').empty().html(trHtmls.join(''));
+
+                $.each($('#tzydtBody tr'), function(index, tr){
+                    $.data(tr,'item', result.items[index]);
+                });
+            });
+        }
+
+        function renderPaginator(ulId,pageNo, totalCount, pageSize ,load){
+            var $ul = $('#'+ulId).empty();
+
+            var totalPage = totalCount % pageSize === 0 ? parseInt(totalCount/pageSize) : parseInt(totalCount/pageSize) + 1;
+            totalPage = totalPage ? totalPage : 0;
+            if(totalPage === 0){
+                pageNo = 0;
+            }else if(pageNo > totalPage){
+                pageNo = totalPage;
+            }else if(pageNo < 1 && totalPage != 0){
+                pageNo = 0;
+            }
+            //
+            var $prev = $('<li><a>«</a></li>');
+            if(pageNo<=0){
+                $prev.addClass('disabled');
+            }else{
+                $prev.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo-1,pageSize)
+                });
+            }
+            $ul.append($prev);
+            /////
+            var list = [1];
+            for(var i= 0; i < 5; i++){
+                var no = pageNo - 2 + i;
+
+                if(i==0 && no > 3){
+                    list.push('...');
+                }
+                if(no > 1 && no <= totalPage-1){
+                    list.push(no);
+                }
+            }
+
+            if(pageNo+2 < totalPage-1){
+                list.push('...');
+            }
+            if(totalPage>1){
+                list.push(totalPage);
+            }
+
+            $.each(list, function(index, item){
+                var $li = $('<li><a></a></li>');
+                if(item === '...'){
+                    $li.find('a').text('...');
+                }else if(item === pageNo+1){
+                    $li.addClass('active').find('a').text(item);
+                }else{
+                    $li.find('a').text(item).prop('title','第'+item+'页').on('click', function(e){
+                        e.preventDefault();
+                        load(item-1,pageSize);
+                    });
+                }
+                $ul.append($li);
+            });
+
+            //
+            var $next = $('<li><a title="下一页">»</a></li>');
+            if(pageNo+1>=totalPage){
+                $next.addClass('disabled');
+            }else{
+                $next.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo+1,pageSize);
+                });
+            }
+            $ul.append($next);
+
         }
