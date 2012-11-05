@@ -1,7 +1,4 @@
 extends ../layout
-block style
-    link(rel='stylesheet', href='/js/fastGrid/fastGrid.css')
-    link(rel='stylesheet', href='/js/paginator/paginator.css')
 block body
     include ../banner.jade
     nav.nav
@@ -73,8 +70,6 @@ block body
 
 
 block script
-    script(src='/js/fastGrid/fastGrid.js')
-    script(src='/js/paginator/paginator.js')
     script(src='/js/datejs.js')
     script
         $(function () {

@@ -1,0 +1,148 @@
+extends ../layout
+block style
+    style
+        .chart{
+            min-width: 400px;
+            height: 400px;
+            margin: 0 auto ;
+        }
+
+        .maps{
+            min-width: 400px;
+            height: 600px;
+            margin: 0 auto ;
+            border: 1px solid #b8bcc0;
+        }
+
+block body
+    include ../banner.jade
+    nav.nav
+        div.navContent
+            div.header
+                h1 访问统计
+                ul.tabs
+                    li: a.selected 流量统计
+                    li: a 地址分布
+                    li: a 公司访问
+            include ../login
+    div.main
+        section
+            p 描述
+            div#dayChart.chart
+        section(style='display:none;')
+            p 描述
+            div#map_canvas.maps
+        section(style='display:none;')
+            p 描述
+            table.table.table-bordered.table-striped
+                thead
+                    tr
+                        th(style="text-align: center;") 时间
+                        th(style="text-align: center;") 公司名
+                        th 域名
+                        th(style="text-align: right;") 访问量(万)
+                tbody#tzydtBody
+                    tr
+                        td(style="text-align: center;") 2012-09-30
+                        td(style="text-align: center;") 齐鲁证券
+                        td 95538.cn
+                        td(style="text-align: right;") 1268
+            div.pagination.pagination-right
+                ul#tzydtPaginator
+                    li
+                        a(href="#") «
+                    li
+                        a(href="#") 1
+                    li
+                        a(href="#") 2
+                    li
+                        a(href="#") 3
+                    li
+                        a(href="#") 4
+                    li
+                        a ...
+                    li
+                        a(href="#") 12
+                    li
+                        a(href="#") »
+
+block script
+    script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBrDF1WpWGJlzMyNUs4rOZ-Lgz3nNYb6PQ&sensor=true')
+    script(src='/js/highcharts/highcharts.js')
+    script
+        $(function () {
+            var map;
+            $('.tabs a').on("click", function(e){
+                $('.tabs a').removeClass('selected');
+                $(this).addClass('selected');
+                var index = $('.tabs a').index($(this));
+                $('.main section').hide().eq(index).show();
+                if(index === 1 && !map){
+                    var pos = new google.maps.LatLng(36.6609970, 117.0204970);
+                    var mapOptions = {
+                      center: pos,
+                      zoom: 13,
+                      mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+                    map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+                    var marker = new google.maps.Marker({
+                        position: pos,
+                        map: map,
+                        title: "354万"
+                    });
+                    var contentString = "<b>城市:</b> 济南 <br/> <b>访问量:</b> 345万";
+                        var infowindow = new google.maps.InfoWindow({
+                            content: contentString
+                        });
+                    //提示事件绑定
+                    google.maps.event.addListener(marker, 'click', function() {
+                        infowindow.open(map,marker);
+                    })
+                }else if(index === 2){
+
+                }
+            });
+
+            var chart;
+            $(document).ready(function() {
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'dayChart',
+                        type: 'line'
+                    },
+                    title: {
+                        text: '每日流量统计',
+                        x: -20 //center
+                    },
+                    subtitle: {
+                        text: '最近十天的访问计数',
+                        x: -20
+                    },
+                    xAxis: {
+                        categories: [ '2012-10-12', '2012-10-13', '2012-10-14', '2012-10-15',
+                            '2012-10-16', '2012-10-17', '2012-10-18', '2012-10-19', '2012-10-20', '2012-10-21']
+                    },
+                    yAxis: {
+                        title: {
+                            text: '访问量(万)'
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return '<b>'+ this.series.name +'</b><br/>'+
+                            this.x +': '+ this.y +'万';
+                        }
+                    },
+
+                    series: [{
+                        name: '日流量',
+                        data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3]
+                    }]
+                });
+            });
+        });

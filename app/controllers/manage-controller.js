@@ -178,4 +178,15 @@ module.exports = function(app){
                 });
             })
     });
+
+
+
+    app.get('/manage/statistics', function(req, res){
+        res.render('manage/statistics', {
+            title : '访问统计'
+            ,description: 'statistics Description'
+            ,author: 'miemiedev'
+            ,l1: true,l2: false,l3: false,l4: false
+        });
+    });
 };
