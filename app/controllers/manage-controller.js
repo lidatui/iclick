@@ -7,6 +7,7 @@ module.exports = function(app){
     var Template = mongoose.model('Template');
     var AccessControl = mongoose.model('AccessControl');
     var User = mongoose.model('User');
+    var Access = mongoose.model('Access');
 
     function restrict(req, res, next) {
         if (req.session.user) {
@@ -53,12 +54,21 @@ module.exports = function(app){
         }
     }
 
+    function access(req, res, next){
+        if (req.session.user.role.access) {
+            next();
+        } else {
+            req.session.error = '无此权限!';
+            res.redirect('/login');
+        }
+    }
+
     app.get('/manage/article', restrict, article, function(req, res){
         res.render('manage/article', {
             title : '内容管理'
             ,description: 'article Description'
             ,author: 'miemiedev'
-            ,l1: false,l2: true,l3: false,l4: false,l5: false
+            ,l1: false,l2: true,l3: false,l4: false,l5: false,l6: false
         });
     });
 
@@ -114,7 +124,7 @@ module.exports = function(app){
             title : '模版'
             ,description: 'template Description'
             ,author: 'miemiedev'
-            ,l1: false,l2: false,l3: false,l4: true,l5: false
+            ,l1: false,l2: false,l3: false,l4: true,l5: false,l6: false
         });
     });
 
@@ -169,7 +179,7 @@ module.exports = function(app){
             title : '访问控制'
             ,description: 'accessControl Description'
             ,author: 'miemiedev'
-            ,l1: false,l2: false,l3: true,l4: false,l5: false
+            ,l1: false,l2: false,l3: true,l4: false,l5: false,l6: false
         });
     });
 
@@ -232,7 +242,7 @@ module.exports = function(app){
             title : '访问统计'
             ,description: 'statistics Description'
             ,author: 'miemiedev'
-            ,l1: true,l2: false,l3: false,l4: false,l5: false
+            ,l1: true,l2: false,l3: false,l4: false,l5: false,l6: false
         });
     });
 
@@ -241,7 +251,7 @@ module.exports = function(app){
             title : '访问统计'
             ,description: 'user Description'
             ,author: 'miemiedev'
-            ,l1: false,l2: false,l3: false,l4: false,l5: true
+            ,l1: false,l2: false,l3: false,l4: false,l5: true,l6: false
         });
     });
 
@@ -282,6 +292,38 @@ module.exports = function(app){
                         , totalCount: count
                     });
                 })
+            })
+    });
+
+    app.get('/manage/access',restrict,access, function(req, res){
+        res.render('manage/access', {
+            title : '访问记录'
+            ,description: 'access Description'
+            ,author: 'miemiedev'
+            ,l1: false,l2: false,l3: false,l4: false,l5: false,l6: true
+        });
+    });
+
+    app.get('/manage/access/list',restrict,access, function(req, res){
+        var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
+            , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
+        Access
+            .find({})
+            .populate('ipInfo')
+            .limit(pageSize)
+            .skip(pageSize * pageNo)
+            .sort('-_id')
+            .exec(function (err, accesses) {
+
+                Access.count().exec(function (err, count) {
+                        res.send({
+                            items: accesses
+                            , pageNo: pageNo
+                            , totalCount: count
+                            , pageSize: pageSize
+                        });
+                    })
+
             })
     });
 };

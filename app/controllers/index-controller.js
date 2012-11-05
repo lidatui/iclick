@@ -37,7 +37,8 @@ module.exports = function(app){
                                 accessControl: 1,
                                 template: 1,
                                 statistics: 1,
-                                user: 1
+                                user: 1,
+                                access: 1
                             }
                         });
                         user.save(function(err){

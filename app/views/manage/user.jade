@@ -80,6 +80,9 @@ block body
                                         label.checkbox
                                             input#userRoleUser(type="checkbox")
                                             span 用户权限
+                                        label.checkbox
+                                            input#userRoleAccess(type="checkbox")
+                                            span 访问记录
                                 div.control-group
                                     div.controls
                                         label.checkbox
@@ -117,6 +120,7 @@ block script
                 $('#userRoleTemplate')[0].checked = item.role.template;
                 $('#userRoleStatistics')[0].checked = item.role.statistics;
                 $('#userRoleUser')[0].checked = item.role.user;
+                $('#userRoleAccess')[0].checked = item.role.access;
                 $('#userLocked')[0].checked = item.locked;
 
                 $('#userModal').data('item',item);
@@ -135,6 +139,7 @@ block script
                 var roleTemplate = $('#userRoleTemplate')[0].checked;
                 var roleStatistics = $('#userRoleStatistics')[0].checked;
                 var roleUser = $('#userRoleUser')[0].checked;
+                var roleAccess = $('#userRoleAccess')[0].checked;
                 var locked = $('#userLocked')[0].checked;
                 if(!loginName || (!loginPwd && !param.loginPwd)){
                     if(!loginName){
@@ -154,7 +159,8 @@ block script
                         accessControl: roleAccessControl ? 1: 0,
                         template: roleTemplate ? 1: 0,
                         statistics: roleStatistics ? 1: 0,
-                        user: roleUser ? 1: 0
+                        user: roleUser ? 1: 0,
+                        access: roleAccess ? 1: 0
                     },
                     locked: locked ? 1: 0
                 });
@@ -227,6 +233,7 @@ block script
             $('#userRoleTemplate')[0].checked = false;
             $('#userRoleStatistics')[0].checked = false;
             $('#userRoleUser')[0].checked = false;
+            $('#userRoleAccess')[0].checked = false;
             $('#userLocked')[0].checked = false;
             $('#userModal .modal-body .alert-error').hide();
         }
@@ -281,6 +288,9 @@ block script
                     }
                     if(item.role.user){
                         trHtmls.push('用户权限 ');
+                    }
+                    if(item.role.access){
+                        trHtmls.push('访问记录 ');
                     }
                     trHtmls.push('</td>');
                     if(item.locked){

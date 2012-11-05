@@ -27,3 +27,8 @@ nav.banner
                     li: a.selected 用户权限
                 - else
                     li: a(href='/manage/user') 用户权限
+            - if (session.user.role.access)
+                - if (l6)
+                    li: a.selected 访问记录
+                - else
+                    li: a(href='/manage/access') 访问记录

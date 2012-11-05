@@ -8,7 +8,8 @@ var UserSchema = new Schema({
         accessControl: { type: Boolean, default: false},
         template: { type: Boolean, default: false},
         statistics: { type: Boolean, default: false},
-        user: { type: Boolean, default: false}
+        user: { type: Boolean, default: false},
+        access: { type: Boolean, default: false}
     }
 });
 mongoose.model('User', UserSchema);

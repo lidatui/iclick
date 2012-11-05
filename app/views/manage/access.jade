@@ -1,0 +1,208 @@
+extends ../layout
+block body
+    include ../includes/banner
+    nav.nav
+        div.navContent
+            div.header
+                h1 访问记录
+                ul.tabs
+                    li: a.selected 列表
+            include ../includes/login
+    div.main
+        section
+            p 描述
+            div.row-fluid
+                div.span12
+                    table.table.table-bordered.table-striped
+                        thead
+                            tr
+                                th(style="text-align: center;") #
+                                th(style="text-align: center;") 访问时间
+                                th(style="text-align: center;") IP地址
+                                th(style="text-align: center;") 国家
+                                th(style="text-align: center;") 省份
+                                th(style="text-align: center;") 城市
+                                th(style="text-align: center;") 城区
+                                th(style="text-align: center;") 运营商
+                                th(style="text-align: center;") 描述
+                                th(style="text-align: center;") OS
+                                th(style="text-align: center;") 浏览器
+                        tbody#accessBody
+
+                    div.pagination.pagination-right
+                        ul#accessPaginator
+
+
+
+block script
+    script(src='/js/datejs.js')
+    script
+        $(function () {
+
+            loadAccess(0,100);
+        });
+
+        function getItemCreateTime(objectId){
+            var str = objectId.toString().slice(0,8);
+            var time = parseInt(str,16) * 1000;
+            return new Date(time).toString('yyyy-MM-dd HH:mm:ss');
+        }
+
+        function loadAccess(pageNo, pageSize){
+
+            if(pageNo >= 0){
+                $('#accessPaginator').data('pageNo',pageNo);
+            }else{
+                pageNo = $('#accessPaginator').data('pageNo');
+                pageNo = pageNo >=0 ? pageNo : 0;
+            }
+            if(pageSize >= 1){
+                $('#accessPaginator').data('pageSize',pageSize);
+            }else{
+                pageSize = $('#sitePaginator').data('pageSize');
+                pageSize = pageSize >=1 ? pageSize : 10;
+            }
+
+            $.ajax({
+                url: '/manage/access/list',
+                dataType: 'json',
+                data: {
+                pageNo: pageNo,
+                pageSize: pageSize
+                },
+                cache: false
+            }).done(function(result){
+                renderPaginator('accessPaginator', pageNo,result.totalCount,pageSize,loadAccess);
+
+                var trHtmls = [];
+                $.each(result.items, function(index,item){
+                    trHtmls.push('<tr>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    trHtmls.push(pageNo * pageSize +index+1);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    trHtmls.push(getItemCreateTime(item._id));
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    trHtmls.push(item.ip);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    if(item.ipInfo){
+                        trHtmls.push(item.ipInfo.country);
+                    }
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    if(item.ipInfo){
+                        trHtmls.push(item.ipInfo.province);
+                    }
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    if(item.ipInfo){
+                        trHtmls.push(item.ipInfo.city);
+                    }
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    if(item.ipInfo){
+                        trHtmls.push(item.ipInfo.district);
+                    }
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    if(item.ipInfo){
+                        trHtmls.push(item.ipInfo.isp);
+                    }
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    if(item.ipInfo){
+                        trHtmls.push(item.ipInfo.desc);
+                    }
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    trHtmls.push(item.os);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    trHtmls.push(item.browser);
+                    trHtmls.push('</td>');
+                    trHtmls.push('</tr>');
+                });
+
+                $('#accessBody').empty().html(trHtmls.join(''));
+
+                $.each($('#accessBody tr'), function(index, tr){
+                    $.data(tr,'item', result.items[index]);
+                });
+            });
+        }
+
+
+
+        function renderPaginator(ulId,pageNo, totalCount, pageSize ,load){
+            var $ul = $('#'+ulId).empty();
+
+            var totalPage = totalCount % pageSize === 0 ? parseInt(totalCount/pageSize) : parseInt(totalCount/pageSize) + 1;
+            totalPage = totalPage ? totalPage : 0;
+            if(totalPage === 0){
+                pageNo = 0;
+            }else if(pageNo > totalPage){
+                pageNo = totalPage;
+            }else if(pageNo < 1 && totalPage != 0){
+                pageNo = 0;
+            }
+            //
+            var $prev = $('<li><a>«</a></li>');
+            if(pageNo<=0){
+                $prev.addClass('disabled');
+            }else{
+                $prev.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo-1,pageSize)
+                });
+            }
+            $ul.append($prev);
+            /////
+            var list = [1];
+            for(var i= 0; i < 5; i++){
+                var no = pageNo - 2 + i;
+
+                if(i==0 && no > 3){
+                    list.push('...');
+                }
+                if(no > 1 && no <= totalPage-1){
+                    list.push(no);
+                }
+            }
+
+            if(pageNo+2 < totalPage-1){
+                list.push('...');
+            }
+            if(totalPage>1){
+                list.push(totalPage);
+            }
+
+            $.each(list, function(index, item){
+                var $li = $('<li><a></a></li>');
+                if(item === '...'){
+                    $li.find('a').text('...');
+                }else if(item === pageNo+1){
+                    $li.addClass('active').find('a').text(item);
+                }else{
+                    $li.find('a').text(item).prop('title','第'+item+'页').on('click', function(e){
+                        e.preventDefault();
+                        load(item-1,pageSize);
+                    });
+                }
+                $ul.append($li);
+            });
+
+            //
+            var $next = $('<li><a title="下一页">»</a></li>');
+            if(pageNo+1>=totalPage){
+                $next.addClass('disabled');
+            }else{
+                $next.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo+1,pageSize);
+                });
+            }
+            $ul.append($next);
+
+        }
