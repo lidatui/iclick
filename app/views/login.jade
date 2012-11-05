@@ -1,0 +1,31 @@
+extends layout
+
+block body
+    |<div class="well" style="max-width: 400px; margin: 200px auto 10px;">
+    |<h3 style="text-align: center;">投资一点通</h3>
+    p.text-error(style="text-align: center;") #{session.error}
+    |<form class="form-horizontal" action="login" method="post">
+    |    <div class="control-group">
+    |        <label class="control-label" for="loginName">登录名</label>
+    |        <div class="controls">
+    |            <input type="text" id="loginName" name="loginName" placeholder="">
+    |        </div>
+    |    </div>
+    |    <div class="control-group">
+    |        <label class="control-label" for="loginPwd">密码</label>
+    |        <div class="controls">
+    |            <input type="password" id="loginPwd" name="loginPwd" placeholder="">
+    |        </div>
+    |    </div>
+    |    <div class="control-group">
+    |        <div class="controls">
+    |            <button type="submit" class="btn btn-primary">登陆</button>
+    |        </div>
+    |    </div>
+    |</form>
+    |</div>
+block script
+    script
+        $(function () {
+
+        });

@@ -22,6 +22,10 @@ app.configure(function(){
   app.use(express.cookieParser('your secret here'));
   app.use(express.session());
   app.use(express.static(path.join(__dirname, '/static')));
+  app.use(function(req, res, next){
+    res.locals.session = req.session;
+    next();
+  });
 });
 
 

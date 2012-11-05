@@ -8,7 +8,52 @@ module.exports = function(app){
     var AccessControl = mongoose.model('AccessControl');
     var User = mongoose.model('User');
 
-    app.get('/manage/article', function(req, res){
+    function restrict(req, res, next) {
+        if (req.session.user) {
+            next();
+        } else {
+            req.session.error = '您的登陆状态已过期，请重新登录!';
+            res.redirect('/login');
+        }
+    }
+
+    function article(req, res, next){
+        if (req.session.user.role.article) {
+            next();
+        } else {
+            req.session.error = '无此权限!';
+            res.redirect('/login');
+        }
+    }
+
+    function template(req, res, next){
+        if (req.session.user.role.template) {
+            next();
+        } else {
+            req.session.error = '无此权限!';
+            res.redirect('/login');
+        }
+    }
+
+    function user(req, res, next){
+        if (req.session.user.role.user) {
+            next();
+        } else {
+            req.session.error = '无此权限!';
+            res.redirect('/login');
+        }
+    }
+
+    function accessControl(req, res, next){
+        if (req.session.user.role.accessControl) {
+            next();
+        } else {
+            req.session.error = '无此权限!';
+            res.redirect('/login');
+        }
+    }
+
+    app.get('/manage/article', restrict, article, function(req, res){
         res.render('manage/article', {
             title : '内容管理'
             ,description: 'article Description'
@@ -17,7 +62,7 @@ module.exports = function(app){
         });
     });
 
-    app.post('/manage/article/save', function(req, res){
+    app.post('/manage/article/save', restrict, article, function(req, res){
         Article.findById(req.body._id,function(err,article){
             if(!article){
                 article = new Article(req.body);
@@ -30,14 +75,14 @@ module.exports = function(app){
         });
     });
 
-    app.get('/manage/article/remove', function(req, res){
+    app.get('/manage/article/remove', restrict, article, function(req, res){
         var id = req.query["_id"];
         Article.remove({ _id: id }).exec(function(err,obj){
             res.send('success');
         });
     });
 
-    app.get('/manage/article/list', function(req, res){
+    app.get('/manage/article/list', restrict, article, function(req, res){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
 
@@ -64,7 +109,7 @@ module.exports = function(app){
 
 
 
-    app.get('/manage/template', function(req, res){
+    app.get('/manage/template', restrict, template, function(req, res){
         res.render('manage/template', {
             title : '模版'
             ,description: 'template Description'
@@ -73,7 +118,7 @@ module.exports = function(app){
         });
     });
 
-    app.post('/manage/template/save', function(req, res){
+    app.post('/manage/template/save', restrict, template, function(req, res){
         Template.findById(req.body._id,function(err,tpl){
             if(!tpl){
                 tpl = new Template(req.body);
@@ -86,13 +131,13 @@ module.exports = function(app){
         });
     });
 
-    app.get('/manage/template/remove', function(req, res){
+    app.get('/manage/template/remove', restrict, template, function(req, res){
         Template.remove({ _id: req.query["_id"] }).exec(function(err,obj){
             res.send('success');
         });
     });
 
-    app.get('/manage/template/list', function(req,res){
+    app.get('/manage/template/list', restrict, template, function(req,res){
         Article
             .findOne({})
             .sort('-_id')
@@ -119,7 +164,7 @@ module.exports = function(app){
 
 
 
-    app.get('/manage/accessControl', function(req, res){
+    app.get('/manage/accessControl', restrict, accessControl, function(req, res){
         res.render('manage/accessControl', {
             title : '访问控制'
             ,description: 'accessControl Description'
@@ -128,7 +173,7 @@ module.exports = function(app){
         });
     });
 
-    app.post('/manage/accessControl/save', function(req, res){
+    app.post('/manage/accessControl/save', restrict, accessControl, function(req, res){
         AccessControl.findById(req.body._id,function(err,ac){
             if(!ac){
                 ac = new AccessControl(req.body);
@@ -141,13 +186,13 @@ module.exports = function(app){
         });
     });
 
-    app.get('/manage/accessControl/remove', function(req, res){
+    app.get('/manage/accessControl/remove', restrict, accessControl, function(req, res){
         AccessControl.remove({ _id: req.query["_id"] }).exec(function(err,obj){
             res.send('success');
         });
     });
 
-    app.get('/manage/accessControl/list', function(req, res){
+    app.get('/manage/accessControl/list', restrict, accessControl, function(req, res){
 
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
@@ -182,7 +227,7 @@ module.exports = function(app){
 
 
 
-    app.get('/manage/statistics', function(req, res){
+    app.get('/manage/statistics', restrict, function(req, res){
         res.render('manage/statistics', {
             title : '访问统计'
             ,description: 'statistics Description'
@@ -191,7 +236,7 @@ module.exports = function(app){
         });
     });
 
-    app.get('/manage/user', function(req, res){
+    app.get('/manage/user', restrict, user, function(req, res){
         res.render('manage/user', {
             title : '访问统计'
             ,description: 'user Description'
@@ -200,7 +245,7 @@ module.exports = function(app){
         });
     });
 
-    app.post('/manage/user/save', function(req, res){
+    app.post('/manage/user/save', restrict, user, function(req, res){
         User.findById(req.body._id,function(err,user){
             if(!user){
                 user = new User(req.body);
@@ -213,13 +258,13 @@ module.exports = function(app){
         });
     });
 
-    app.get('/manage/user/remove', function(req, res){
+    app.get('/manage/user/remove', restrict, user, function(req, res){
         User.remove({ _id: req.query["_id"] }).exec(function(err,obj){
             res.send('success');
         });
     });
 
-    app.get('/manage/user/list', function(req, res){
+    app.get('/manage/user/list', restrict, user, function(req, res){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
 

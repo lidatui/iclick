@@ -2,23 +2,28 @@ nav.banner
     div.bannerContent
         a.logo 投资一点通
         ul
-            - if (l1)
-                li: a.selected 访问统计
-            - else
-                li: a(href='/manage/statistics') 访问统计
-            - if (l2)
-                li: a.selected 内容管理
-            - else
-                li: a(href='/manage/article') 内容管理
-            - if (l3)
-                li: a.selected 访问控制
-            - else
-                li: a(href='/manage/accessControl') 访问控制
-            - if (l4)
-                li: a.selected 模版
-            - else
-                li: a(href='/manage/template') 模版
-            - if (l5)
-                li: a.selected 用户权限
-            - else
-                li: a(href='/manage/user') 用户权限
+            - if (session.user.role.statistics)
+                - if (l1)
+                    li: a.selected 访问统计
+                - else
+                    li: a(href='/manage/statistics') 访问统计
+            - if (session.user.role.article)
+                - if (l2)
+                    li: a.selected 内容管理
+                - else
+                    li: a(href='/manage/article') 内容管理
+            - if (session.user.role.accessControl)
+                - if (l3)
+                    li: a.selected 访问控制
+                - else
+                    li: a(href='/manage/accessControl') 访问控制
+            - if (session.user.role.template)
+                - if (l4)
+                    li: a.selected 模版
+                - else
+                    li: a(href='/manage/template') 模版
+            - if (session.user.role.user)
+                - if (l5)
+                    li: a.selected 用户权限
+                - else
+                    li: a(href='/manage/user') 用户权限
