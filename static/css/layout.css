@@ -129,7 +129,7 @@ a:hover { color:#5c5c5c; text-decoration:underline; cursor:pointer;}
     position: absolute;
     top: 0;
     right: 0;
-    width: 285px;
+    width: 100px;
     height: 98px;
     line-height: 23px;
 }

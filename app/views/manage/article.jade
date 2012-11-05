@@ -230,11 +230,13 @@ block script
                     trHtmls.push(getItemCreateTime(item._id));
                     trHtmls.push('</td>');
                     trHtmls.push('<td>');
-                    trHtmls.push('<a href="');
+                    trHtmls.push('<a  href="');
                     trHtmls.push(item.targetUrl);
                     trHtmls.push('" ');
                     if(item.highlight){
                         trHtmls.push('style="color: #B94A48;" ');
+                    }else{
+                        trHtmls.push('style="color:#08C;" ');
                     }
                     trHtmls.push('>');
                     trHtmls.push(item.title);
