@@ -1,0 +1,367 @@
+extends ../layout
+block body
+    include ../banner.jade
+    nav.nav
+        div.navContent
+            div.header
+                h1 用户权限
+                ul.tabs
+                    li: a.selected 列表
+            include ../login
+    div.main
+        section
+            p 描述
+            div.row-fluid
+                div.span10
+                    table.table.table-bordered.table-striped
+                        thead
+                            tr
+                                th(style="text-align: center;") #行号
+                                th(style="text-align: center;") 登录名
+                                th 权限
+                                th 状态
+                        tbody#userBody
+                            tr
+                                td(style="text-align: center;") 1
+                                td(style="text-align: center;") admin
+                                td 访问统计,内容管理,访问控制,模版,用户权限
+                                td 正常
+                    div.pagination.pagination-right
+                        ul#userPaginator
+                            li
+                                a(href="#") «
+                            li
+                                a(href="#") 1
+                            li
+                                a(href="#") 2
+                            li
+                                a(href="#") 3
+                            li
+                                a(href="#") 4
+                            li
+                                a ...
+                            li
+                                a(href="#") 12
+                            li
+                                a(href="#") »
+                div.span2
+                    div#userModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="userLabel",aria-hidden="true")
+                        div.modal-header
+                            button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+                            h3#userLabel 用户-属性
+                        div.modal-body
+                            div.alert.alert-error.hide 一切正常
+                            form.form-horizontal
+                                div.control-group
+                                    label.control-label(for="userLoginName") 登录名
+                                    div.controls
+                                        input#userLoginName(type="text",placeholder="")
+                                        span.help-inline.hide 登录名不能为空.
+                                div.control-group
+                                    label.control-label(for="userLoginPwd") 登录密码
+                                    div.controls
+                                        input#userLoginPwd(type="password",placeholder="")
+                                        span.help-inline.hide 登录密码不能为空.
+                                div.control-group
+                                    label.control-label(for="userRole") 权限
+                                    div.controls
+                                        label.checkbox
+                                            input#userRoleArticle(type="checkbox")
+                                            span 内容管理
+                                        label.checkbox
+                                            input#userRoleAccessControl(type="checkbox")
+                                            span 访问控制
+                                        label.checkbox
+                                            input#userRoleTemplate(type="checkbox")
+                                            span 模版
+                                        label.checkbox
+                                            input#userRoleStatistics(type="checkbox")
+                                            span 访问统计
+                                        label.checkbox
+                                            input#userRoleUser(type="checkbox")
+                                            span 用户权限
+                                div.control-group
+                                    div.controls
+                                        label.checkbox
+                                            input#userLocked(type="checkbox")
+                                            span 是否锁定
+                        div.modal-footer
+                            button.btn(data-dismiss="modal",aria-hidden="true") 关闭
+                            button#userSave.btn.btn-primary 保存
+                    button#userAdd.btn.btn-block.btn-success(type="button") 添加
+                    button#userEdit.btn.btn-block.btn-primary(type="button") 编辑
+                    button#userRemove.btn.btn-block.btn-danger(type="button") 删除
+
+
+
+block script
+    script(src='/js/datejs.js')
+    script
+        $(function () {
+            $('#userAdd').on('click',function(){
+                clearUserForm();
+                $('#userModal').removeData('item');
+                $('#userModal').modal('show');
+            });
+
+            $('#userEdit').on('click',function(){
+                var tr = $('#userBody tr.warning')[0];
+                if(!tr){
+                    alert('请选择一行进行编辑');
+                    return ;
+                }
+                var item = $.data(tr,'item');
+                $('#userLoginName').val(item.loginName);
+                $('#userRoleArticle')[0].checked = item.role.article;
+                $('#userRoleAccessControl')[0].checked = item.role.accessControl;
+                $('#userRoleTemplate')[0].checked = item.role.template;
+                $('#userRoleStatistics')[0].checked = item.role.statistics;
+                $('#userRoleUser')[0].checked = item.role.user;
+                $('#userLocked')[0].checked = item.locked;
+
+                $('#userModal').data('item',item);
+                $('#userModal').modal('show');
+            });
+
+
+            $('#userSave').on('click',function(){
+
+                var param = {};
+                param = $.extend(param,$('#userModal').data('item'));
+                var loginName = $('#userLoginName').val();
+                var loginPwd = $('#userLoginPwd').val();
+                var roleArticle = $('#userRoleArticle')[0].checked;
+                var roleAccessControl = $('#userRoleAccessControl')[0].checked;
+                var roleTemplate = $('#userRoleTemplate')[0].checked;
+                var roleStatistics = $('#userRoleStatistics')[0].checked;
+                var roleUser = $('#userRoleUser')[0].checked;
+                var locked = $('#userLocked')[0].checked;
+                if(!loginName || (!loginPwd && !param.loginPwd)){
+                    if(!loginName){
+                        $('#userLoginName').parent().parent().addClass('error');
+                        $('#userLoginName').next().show();
+                    }
+                    if(!loginPwd && !param.loginPwd){
+                        $('#userLoginPwd').parent().parent().addClass('error');
+                        $('#userLoginPwd').next().show();
+                    }
+                    return;
+                }
+                param = $.extend(param,{
+                    loginName: loginName,
+                    role: {
+                        article: roleArticle ? 1: 0,
+                        accessControl: roleAccessControl ? 1: 0,
+                        template: roleTemplate ? 1: 0,
+                        statistics: roleStatistics ? 1: 0,
+                        user: roleUser ? 1: 0
+                    },
+                    locked: locked ? 1: 0
+                });
+                if(loginPwd){
+                    param.loginPwd = loginPwd;
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '/manage/user/save',
+                    data: param,
+                    dataType: 'text',
+                    cache: false
+                }).done(function(result){
+                    if(param._id){
+                        loadUser();
+                    }else{
+                        loadUser(0);
+                    }
+
+                    $('#userModal').modal('hide');
+                    clearUserForm();
+                }).fail(function(data){
+                    $('#userModal .modal-body .alert-error').show().text(data.statusText + ': ' + data.responseText);
+                });
+            });
+
+            $('#userRemove').on('click',function(){
+                var tr = $('#userBody tr.warning')[0];
+                if(!tr){
+                    alert('请选择一行进行删除');
+                    return ;
+                }
+                var item = $.data(tr,'item');
+                if(!confirm('你确定要删除吗?')){
+                    return;
+                }
+                $.ajax({
+                    type: 'Get',
+                    url: '/manage/user/remove',
+                    data: {
+                        _id: item._id
+                    },
+                    dataType: 'text',
+                    cache: false
+                }).done(function(result){
+                    loadUser();
+                }).fail(function(data){
+                    console.log(data.statusText + ': ' + data.responseText);
+                });
+            });
+
+
+            $('#userBody').on('click', 'tr', function(){
+                $('#userBody tr').removeClass('warning');
+                $(this).addClass('warning');
+            });
+
+            loadUser(0,10);
+        });
+
+        function clearUserForm(){
+            $('#userLoginName').parent().parent().removeClass('error');
+            $('#userLoginName').next().hide();
+            $('#userLoginName').val('');
+            $('#userLoginPwd').parent().parent().removeClass('error');
+            $('#userLoginPwd').next().hide();
+            $('#userLoginPwd').val('');
+            $('#userRoleArticle')[0].checked = false;
+            $('#userRoleAccessControl')[0].checked = false;
+            $('#userRoleTemplate')[0].checked = false;
+            $('#userRoleStatistics')[0].checked = false;
+            $('#userRoleUser')[0].checked = false;
+            $('#userLocked')[0].checked = false;
+            $('#userModal .modal-body .alert-error').hide();
+        }
+
+        function loadUser(pageNo, pageSize){
+
+            if(pageNo >= 0){
+                $('#userPaginator').data('pageNo',pageNo);
+            }else{
+                pageNo = $('#userPaginator').data('pageNo');
+                pageNo = pageNo >=0 ? pageNo : 0;
+            }
+            if(pageSize >= 1){
+                $('#userPaginator').data('pageSize',pageSize);
+            }else{
+                pageSize = $('#userPaginator').data('pageSize');
+                pageSize = pageSize >=1 ? pageSize : 10;
+            }
+
+            $.ajax({
+                url: '/manage/user/list',
+                dataType: 'json',
+                data: {
+                pageNo: pageNo,
+                pageSize: pageSize
+                },
+                cache: false
+            }).done(function(result){
+                renderPaginator('userPaginator', pageNo,result.totalCount,pageSize,loadUser);
+
+                var trHtmls = [];
+                $.each(result.items, function(index,item){
+                    trHtmls.push('<tr>');
+                    trHtmls.push('<td style="width: 50px;text-align: center;">');
+                    trHtmls.push(pageNo * pageSize +index+1);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    trHtmls.push(item.loginName);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    if(item.role.article){
+                        trHtmls.push('内容管理 ');
+                    }
+                    if(item.role.accessControl){
+                        trHtmls.push('访问控制 ');
+                    }
+                    if(item.role.template){
+                        trHtmls.push('模版 ');
+                    }
+                    if(item.role.statistics){
+                        trHtmls.push('访问统计 ');
+                    }
+                    if(item.role.user){
+                        trHtmls.push('用户权限 ');
+                    }
+                    trHtmls.push('</td>');
+                    if(item.locked){
+                        trHtmls.push('<td>锁定</td>');
+                    }else{
+                        trHtmls.push('<td>正常</td>');
+                    }
+                    trHtmls.push('</tr>');
+                });
+
+                $('#userBody').empty().html(trHtmls.join(''));
+
+                $.each($('#userBody tr'), function(index, tr){
+                    $.data(tr,'item', result.items[index]);
+                });
+            });
+        }
+
+        function renderPaginator(ulId,pageNo, totalCount, pageSize ,load){
+            var $ul = $('#'+ulId).empty();
+            var totalPage = totalCount % pageSize === 0 ? parseInt(totalCount/pageSize) : parseInt(totalCount/pageSize) + 1;
+            totalPage = totalPage ? totalPage : 0;
+            if(totalPage === 0){
+                pageNo = 0;
+            }else if(pageNo > totalPage){
+                pageNo = totalPage;
+            }else if(pageNo < 1 && totalPage != 0){
+                pageNo = 0;
+            }
+            //
+            var $prev = $('<li><a>«</a></li>');
+            if(pageNo<=0){
+                $prev.addClass('disabled');
+            }else{
+                $prev.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo-1,pageSize)
+                });
+            }
+            $ul.append($prev);
+            /////
+            var list = [1];
+            for(var i= 0; i < 5; i++){
+                var no = pageNo - 2 + i;
+                if(i==0 && no > 3){
+                    list.push('...');
+                }
+                if(no > 1 && no <= totalPage-1){
+                    list.push(no);
+                }
+            }
+            if(pageNo+2 < totalPage-1){
+                list.push('...');
+            }
+            if(totalPage>1){
+                list.push(totalPage);
+            }
+            $.each(list, function(index, item){
+                var $li = $('<li><a></a></li>');
+                if(item === '...'){
+                    $li.find('a').text('...');
+                }else if(item === pageNo+1){
+                    $li.addClass('active').find('a').text(item);
+                }else{
+                    $li.find('a').text(item).prop('title','第'+item+'页').on('click', function(e){
+                        e.preventDefault();
+                        load(item-1,pageSize);
+                    });
+                }
+                $ul.append($li);
+            });
+            //
+            var $next = $('<li><a title="下一页">»</a></li>');
+            if(pageNo+1>=totalPage){
+                $next.addClass('disabled');
+            }else{
+                $next.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo+1,pageSize);
+                });
+            }
+            $ul.append($next);
+        }
+

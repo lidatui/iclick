@@ -1,8 +1,14 @@
 
 var UserSchema = new Schema({
-    name: {type: String, trim: true},
     loginName: {type: String, trim: true},
     loginPwd: {type: String, trim: true},
-    lock: {type: Boolean, default: false}
+    locked: {type: Boolean, default: false},
+    role: {
+        article: { type: Boolean, default: false},
+        accessControl: { type: Boolean, default: false},
+        template: { type: Boolean, default: false},
+        statistics: { type: Boolean, default: false},
+        user: { type: Boolean, default: false}
+    }
 });
 mongoose.model('User', UserSchema);

@@ -18,3 +18,7 @@ nav.banner
                 li: a.selected 模版
             - else
                 li: a(href='/manage/template') 模版
+            - if (l5)
+                li: a.selected 用户权限
+            - else
+                li: a(href='/manage/user') 用户权限

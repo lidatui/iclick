@@ -6,13 +6,14 @@ module.exports = function(app){
     var Article = mongoose.model('Article');
     var Template = mongoose.model('Template');
     var AccessControl = mongoose.model('AccessControl');
+    var User = mongoose.model('User');
 
     app.get('/manage/article', function(req, res){
         res.render('manage/article', {
             title : '内容管理'
             ,description: 'article Description'
             ,author: 'miemiedev'
-            ,l1: false,l2: true,l3: false,l4: false
+            ,l1: false,l2: true,l3: false,l4: false,l5: false
         });
     });
 
@@ -68,7 +69,7 @@ module.exports = function(app){
             title : '模版'
             ,description: 'template Description'
             ,author: 'miemiedev'
-            ,l1: false,l2: false,l3: false,l4: true
+            ,l1: false,l2: false,l3: false,l4: true,l5: false
         });
     });
 
@@ -123,7 +124,7 @@ module.exports = function(app){
             title : '访问控制'
             ,description: 'accessControl Description'
             ,author: 'miemiedev'
-            ,l1: false,l2: false,l3: true,l4: false
+            ,l1: false,l2: false,l3: true,l4: false,l5: false
         });
     });
 
@@ -186,7 +187,56 @@ module.exports = function(app){
             title : '访问统计'
             ,description: 'statistics Description'
             ,author: 'miemiedev'
-            ,l1: true,l2: false,l3: false,l4: false
+            ,l1: true,l2: false,l3: false,l4: false,l5: false
         });
+    });
+
+    app.get('/manage/user', function(req, res){
+        res.render('manage/user', {
+            title : '访问统计'
+            ,description: 'user Description'
+            ,author: 'miemiedev'
+            ,l1: false,l2: false,l3: false,l4: false,l5: true
+        });
+    });
+
+    app.post('/manage/user/save', function(req, res){
+        User.findById(req.body._id,function(err,user){
+            if(!user){
+                user = new User(req.body);
+            }else{
+                user.set(req.body);
+            }
+            user.save(function(err){
+                res.send('success');
+            });
+        });
+    });
+
+    app.get('/manage/user/remove', function(req, res){
+        User.remove({ _id: req.query["_id"] }).exec(function(err,obj){
+            res.send('success');
+        });
+    });
+
+    app.get('/manage/user/list', function(req, res){
+        var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
+            , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
+
+        User
+            .find({})
+            .limit(pageSize)
+            .skip(pageSize * pageNo)
+            .sort('-_id')
+            .exec(function (err, users) {
+                User.count().exec(function (err, count) {
+                    res.send({
+                        items: users
+                        , pageNo: pageNo
+                        , pageSize: pageSize
+                        , totalCount: count
+                    });
+                })
+            })
     });
 };
