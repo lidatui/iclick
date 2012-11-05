@@ -1,6 +1,6 @@
 if(process.env.VCAP_SERVICES){
     var env = JSON.parse(process.env.VCAP_SERVICES);
-    var mongo = env['mongodb-2.2'][0]['credentials'];
+    var mongo = env['mongodb-2.0'][0]['credentials'];
 }
 else{
     var mongo = {

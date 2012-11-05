@@ -110,7 +110,7 @@ module.exports = function(app){
             .exec(function (err, article) {
                 if(article){
                     var model = article.toObject();
-                    model.basePath = 'http://'+req.host+':'+app.get('port');
+                    model.basePath = 'http://iclick.cloudfoundry.com';
                     model.pubDate = dateFormat(model.pubDate,'mm-dd');
                     var result = template(model);
                     res.jsonp({ result: result });
