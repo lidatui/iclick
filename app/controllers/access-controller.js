@@ -5,17 +5,39 @@ module.exports = function(app){
     var dateFormat = require('dateformat');
     var useragent = require('useragent');
     var fs = require('fs');
+    var url = require('url');
 
     var IpInfo = mongoose.model('IpInfo');
     var Access = mongoose.model('Access');
+    var Article = mongoose.model('Article');
+    var AccessControl = mongoose.model('AccessControl');
     app.get('/show', function(req, res, next){
         var access = new Access();
         req.query['access'] = access;
         //访问权限
-        var url = req.query['url'];
-        access.url = url;
-        console.log('request url: ' + url);
-        next();
+        access.url = req.query['url'];
+        var urlObject = url.parse(access.url);
+        console.log('request url: ' + urlObject.hostname);
+        AccessControl
+            .find({})
+            .populate('template')
+            .exec(function (err, acs) {
+                if (err) return next(err);
+                var ac;
+                for(var i=0; i< acs.length; i++){
+                    if(urlObject.hostname.indexOf(acs[i].host) != -1){
+                        ac = acs[i];
+                        break;
+                    }
+                }
+                if(ac){
+                    req.query['template'] = ac.template;
+                    next();
+                }else{
+                    res.jsonp({ result: '您没有权限访问!' });
+                }
+            });
+
     },function(req, res, next){
        //查找ip位置
         var access = req.query['access'];
@@ -79,16 +101,24 @@ module.exports = function(app){
         });
     },function(req, res){
         //渲染模版，返回结果
-        var tpl = fs.readFileSync(__dirname.substr(0,__dirname.length-15) + 'static/tpl/blue/index.html','utf-8');
+        var selectedTpl = req.query['template'];
+        var tpl = fs.readFileSync(__dirname.substr(0,__dirname.length-15) + 'static/tpl/'+selectedTpl.path,'utf-8');
         var template = handlebars.compile(tpl);
-        var result = template({
-            name:'miemiedev',
-            highlight:true,
-            title:'哈哈哈',
-            pubDate:'08-15',
-            basePath: 'http://'+req.host+':3000'
-        })
-        res.jsonp({ result: result });
+        Article
+            .findOne({})
+            .sort('-_id')
+            .exec(function (err, article) {
+                if(article){
+                    var model = article.toObject();
+                    model.basePath = 'http://'+req.host+':'+app.get('port');
+                    model.pubDate = dateFormat(model.pubDate,'mm-dd');
+                    var result = template(model);
+                    res.jsonp({ result: result });
+                }else{
+                    res.jsonp({ result: '无内容' });
+                }
+            });
+
     });
 
     //IP转数字
