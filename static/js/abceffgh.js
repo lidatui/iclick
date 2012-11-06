@@ -1,3 +1,5 @@
+var __$nodeid='';var __$contentid='';var __$title='';var __$AuthorPh='';var __$Editor='';var __$Liability='';var __$pubtime='';var __$source='';
+
 var __$j;
 var __$CountType;
 var __$l;
