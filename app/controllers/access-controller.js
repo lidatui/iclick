@@ -17,7 +17,7 @@ module.exports = function(app){
         //访问权限
         access.url = req.query['url'];
         var urlObject = url.parse(access.url);
-        console.log('request url: ' + urlObject.hostname);
+        //console.log('request url: ' + urlObject.hostname);
         AccessControl
             .find({})
             .populate('template')
@@ -64,7 +64,7 @@ module.exports = function(app){
                 http.request(options,function(reqLookup) {
                     reqLookup.on('data', function (ipData) {
                         var ipResult = JSON.parse(ipData);
-                        console.log('ip lookup: %s',ipData);
+                        //console.log('ip lookup: %s',ipData);
                         if(ipResult.ret != -1){
                             var newIpInfo = new IpInfo(ipResult);
                             newIpInfo.startNum = dot2num(ipResult.start);
@@ -93,7 +93,7 @@ module.exports = function(app){
         next();
     },function(req, res, next){
         //存储
-        console.log('access: %s',req.query['access']);
+        //console.log('access: %s',req.query['access']);
         var access = req.query['access'];
         access.save(function(err){
             if(err) return next(err);
