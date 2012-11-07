@@ -24,7 +24,7 @@ block body
                                 th(style="text-align: center;") 城市
                                 th(style="text-align: center;") 城区
                                 th(style="text-align: center;") 运营商
-                                th(style="text-align: center;") 描述
+                                th(style="text-align: center;") 访问站点
                                 th(style="text-align: center;") OS
                                 th(style="text-align: center;") 浏览器
                         tbody#accessBody
@@ -85,7 +85,13 @@ block script
                     trHtmls.push(getItemCreateTime(item._id));
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
+                    trHtmls.push('<span title="');
+                    if(item.ipInfo){
+                        trHtmls.push(item.ipInfo.desc);
+                    }
+                    trHtmls.push('" >');
                     trHtmls.push(item.ip);
+                    trHtmls.push('</span>');
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
                     if(item.ipInfo){
@@ -113,9 +119,11 @@ block script
                     }
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
-                    if(item.ipInfo){
-                        trHtmls.push(item.ipInfo.desc);
-                    }
+                    trHtmls.push('<span title="');
+                    trHtmls.push(item.url);
+                    trHtmls.push('" >');
+                    trHtmls.push(getLocation(item.url).hostname);
+                    trHtmls.push('</span>');
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
                     trHtmls.push(item.os);
@@ -207,3 +215,9 @@ block script
             $ul.append($next);
 
         }
+
+        var getLocation = function(href) {
+            var l = document.createElement("a");
+            l.href = href;
+            return l;
+        };
