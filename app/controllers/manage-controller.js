@@ -63,6 +63,17 @@ module.exports = function(app){
         }
     }
 
+    function statistics(req, res, next){
+        if (req.session.user.role.statistics) {
+            next();
+        } else {
+            req.session.error = '无此权限!';
+            res.redirect('/login');
+        }
+    }
+
+
+
     app.get('/manage/article', restrict, article, function(req, res){
         res.render('manage/article', {
             title : '内容管理'
@@ -235,15 +246,54 @@ module.exports = function(app){
             })
     });
 
-
-
-    app.get('/manage/statistics', restrict, function(req, res){
+    app.get('/manage/statistics', restrict, statistics, function(req, res){
         res.render('manage/statistics', {
             title : '访问统计'
             ,description: 'statistics Description'
             ,author: 'miemiedev'
             ,l1: true,l2: false,l3: false,l4: false,l5: false,l6: false
         });
+    });
+
+    app.get('/manage/statistics/dayCount', restrict, statistics, function(req, res){
+        var o = {};
+        o.map = function () {
+            var d = this._id.getTimestamp();
+            var month = d.getMonth() < 10 ? '0'+ d.getMonth(): d.getMonth();
+            var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
+            var result = d.getFullYear()+'-'+ month +'-'+ date;
+            emit(result, 1);
+        }
+        o.reduce = function (k, vals) {
+            var total = 0;
+            for ( var i=0; i<vals.length; i++ )
+                total += vals[i];
+            return total;
+        }
+        o.out = 'dayCount';
+        o.verbose = true;
+        Access.mapReduce(o, function (err, model, stats) {
+            model.count().exec(function (err, count) {
+                count = count < 10 ? 10 : count;
+                model.find({})
+                    .limit(10)
+                    .skip(count - 10)
+                    .sort('_id')
+                    .exec(function (err, results) {
+                        var date = [];
+                        var data = [];
+                        for(var i=0; i< results.length; i++){
+                            date.push(results[i]._id);
+                            data.push(results[i].value);
+                        }
+                        res.send({
+                            categories: date
+                            , data: data
+                        });
+                    });
+            });
+
+        })
     });
 
     app.get('/manage/user', restrict, user, function(req, res){

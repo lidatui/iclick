@@ -101,7 +101,12 @@ block script
             });
 
             var chart;
-            $(document).ready(function() {
+
+            $.ajax({
+                url: '/manage/statistics/dayCount',
+                dataType: 'json',
+                cache: false
+            }).done(function(result){
                 chart = new Highcharts.Chart({
                     chart: {
                         renderTo: 'dayChart',
@@ -112,16 +117,15 @@ block script
                         x: -20 //center
                     },
                     subtitle: {
-                        text: '最近十天的访问计数',
+                        text: '最近10天的访问计数',
                         x: -20
                     },
                     xAxis: {
-                        categories: [ '2012-10-12', '2012-10-13', '2012-10-14', '2012-10-15',
-                            '2012-10-16', '2012-10-17', '2012-10-18', '2012-10-19', '2012-10-20', '2012-10-21']
+                        categories: result.categories
                     },
                     yAxis: {
                         title: {
-                            text: '访问量(万)'
+                            text: '访问量(PV)'
                         },
                         plotLines: [{
                             value: 0,
@@ -132,14 +136,25 @@ block script
                     tooltip: {
                         formatter: function() {
                             return '<b>'+ this.series.name +'</b><br/>'+
-                            this.x +': '+ this.y +'万';
+                            this.x +': '+ this.y + '次';
                         }
                     },
-
+                    plotOptions: {
+                        line: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            enableMouseTracking: true
+                        }
+                    },
                     series: [{
                         name: '日流量',
-                        data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3]
-                    }]
+                        data: result.data
+                    }],
+                    credits: {
+                        enabled: false
+                    }
                 });
             });
+
         });

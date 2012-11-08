@@ -7,7 +7,6 @@ module.exports = function(app){
     });
     app.get('/login', function(req, res){
 
-        console.log(req.session);
 
         res.render('login', {
             title : '登陆'
@@ -16,7 +15,6 @@ module.exports = function(app){
         });
     });
     app.post('/login', function(req, res,next){
-        console.log(req.body);
         User.findOne({loginName: req.body.loginName, loginPwd: req.body.loginPwd}, function(err, user){
             if(user){
                 req.session.error = '';
