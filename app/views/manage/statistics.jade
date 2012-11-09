@@ -13,6 +13,16 @@ block style
             margin: 0 auto ;
             border: 1px solid #b8bcc0;
         }
+        .labels {
+            color: black;
+            background-color: transparent;
+            font-family: "Lucida Grande", "Arial", sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            width: 100px;
+            border: 0;
+        }
 
 block body
     include ../includes/banner
@@ -65,6 +75,7 @@ block body
 
 block script
     script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBrDF1WpWGJlzMyNUs4rOZ-Lgz3nNYb6PQ&sensor=true')
+    script(src='http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.1.5/src/markerwithlabel_packed.js')
     script(src='/js/highcharts/highcharts.js')
     script
         $(function () {
@@ -87,6 +98,7 @@ block script
                         map: map,
                         title: "354万"
                     });
+
                     var contentString = "<b>城市:</b> 济南 <br/> <b>访问量:</b> 345万";
                         var infowindow = new google.maps.InfoWindow({
                             content: contentString
@@ -95,6 +107,17 @@ block script
                     google.maps.event.addListener(marker, 'click', function() {
                         infowindow.open(map,marker);
                     })
+
+                    var marker1 = new MarkerWithLabel({
+                        position: new google.maps.LatLng(36.0670820,120.3826400),
+                        draggable: true,
+                        raiseOnDrag: true,
+                        map: map,
+                        labelContent: "3569",
+                        labelAnchor: new google.maps.Point(50, 32),
+                        labelClass: "labels", // the CSS class for the label
+                        labelStyle: {opacity: 1.00}
+                    });
                 }else if(index === 2){
 
                 }
