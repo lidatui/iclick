@@ -21,6 +21,7 @@ block style
             text-align: center;
             width: 40px;
             border: 1px solid #ccc;
+            margin-bottom: 40px;
         }
 
 block body
@@ -48,8 +49,8 @@ block body
                     tr
                         th(style="text-align: center;") #行号
                         th(style="text-align: center;") 时间
-                        th(style="text-align: left;") 公司名
-                        th(style="text-align: left;") 域名
+                        th(style="text-align: center;") 公司名
+                        th(style="text-align: center;") 域名
                         th(style="text-align: right;") 访问量(PV)
                 tbody#companyBody
                     tr
@@ -167,7 +168,7 @@ block script
                 });
             });
 
-            loadCompany(0,10);
+            loadCompany(0,20);
 
         });
 
@@ -254,10 +255,10 @@ block script
                     trHtmls.push('<td style="text-align: center;">');
                     trHtmls.push(item.day);
                     trHtmls.push('</td>');
-                    trHtmls.push('<td style="text-align: left;">');
+                    trHtmls.push('<td style="text-align: center;">');
                     trHtmls.push(item.companyName);
                     trHtmls.push('</td>');
-                    trHtmls.push('<td style="text-align: left;">');
+                    trHtmls.push('<td style="text-align: center;">');
                     trHtmls.push(item.host);
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: right;">');
