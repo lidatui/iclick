@@ -299,7 +299,7 @@ module.exports = function(app){
         })
     });
 
-    app.get('/manage/statistics/gis/provinceCount', function(req, res){
+    app.get('/manage/statistics/gis/provinceCount', restrict, statistics, function(req, res){
         var o = {
             map: function(){
                 emit(this.ipInfo,1);
@@ -373,7 +373,7 @@ module.exports = function(app){
         });
     });
 
-    app.get('/manage/statistics/gis/cityCount', function(req, res){
+    app.get('/manage/statistics/gis/cityCount', restrict, statistics, function(req, res){
         var o = {
             map: function(){
                 emit(this.ipInfo,1);
@@ -444,6 +444,73 @@ module.exports = function(app){
                     });
                 })(r);
             }
+        });
+    });
+
+    app.get('/manage/statistics/companyCount', restrict, statistics, function(req, res){
+        var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
+            , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
+
+        var o = {
+            map: function(){
+                function getHostname(str) {
+                    var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
+                    return str.match(re)[1].toString();
+                }
+                var d = this._id.getTimestamp();
+                var month = d.getMonth() < 10 ? '0'+ d.getMonth(): d.getMonth();
+                var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
+                var day = d.getFullYear()+'-'+ month +'-'+ date;
+                var host = getHostname(this.url);
+                emit({
+                    day:day, host: host
+                },{count: 1});
+            },
+            reduce: function(k, vals){
+                var total = 0;
+                vals.forEach(function(v) {
+                    total += v['count'];
+                });
+                return {count: total};
+            },
+            out: 'companyCount',
+            verbose: true
+        };
+        Access.mapReduce(o, function (err, model, stats){
+            model
+                .find({})
+                .limit(pageSize)
+                .skip(pageSize * pageNo)
+                .sort('-_id.day')
+                .exec(function (err, results) {
+                    AccessControl.find({},function(err, acs){
+                        var items = [];
+                        for(var i=0; i<acs.length; i++){
+                            for(var j=0; j<results.length; j++){
+                                if(results[j]._id['host'].indexOf(acs[i].host) != -1){
+                                    var item = {
+                                        day: results[j]._id['day'],
+                                        host: results[j]._id['host'],
+                                        companyName: acs[i].companyName,
+                                        count: results[j].value.count
+                                    }
+                                    items.push(item);
+                                }
+                            }
+                        }
+                        model.count().exec(function (err, count) {
+                            res.send({
+                                items: items
+                                , pageNo: pageNo
+                                , pageSize: pageSize
+                                , totalCount: count
+                            });
+                        })
+                    });
+                })
+
+
+
         });
     });
 

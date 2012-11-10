@@ -46,15 +46,16 @@ block body
             table.table.table-bordered.table-striped
                 thead
                     tr
+                        th(style="text-align: center;") #行号
                         th(style="text-align: center;") 时间
-                        th(style="text-align: center;") 公司名
-                        th 域名
-                        th(style="text-align: right;") 访问量(万)
-                tbody#tzydtBody
+                        th(style="text-align: left;") 公司名
+                        th(style="text-align: left;") 域名
+                        th(style="text-align: right;") 访问量(PV)
+                tbody#companyBody
                     tr
                         td(colspan="4",style="text-align: center;") 正在加载...
             div.pagination.pagination-right
-                ul#tzydtPaginator
+                ul#companyPaginator
                     li
                         a(href="#") «
                     li
@@ -166,6 +167,8 @@ block script
                 });
             });
 
+            loadCompany(0,10);
+
         });
 
         function addMarker(item) {
@@ -219,3 +222,119 @@ block script
 
         }
 
+        function loadCompany(pageNo, pageSize){
+            if(pageNo >= 0){
+                $('#companyPaginator').data('pageNo',pageNo);
+            }else{
+                pageNo = $('#companyPaginator').data('pageNo');
+                pageNo = pageNo >=0 ? pageNo : 0;
+            }
+            if(pageSize >= 1){
+                $('#companyPaginator').data('pageSize',pageSize);
+            }else{
+                pageSize = $('#companyPaginator').data('pageSize');
+                pageSize = pageSize >=1 ? pageSize : 10;
+            }
+            $.ajax({
+                url: '/manage/statistics/companyCount',
+                dataType: 'json',
+                data: {
+                pageNo: pageNo,
+                pageSize: pageSize
+                },
+                cache: false
+            }).done(function(result){
+                renderPaginator('companyPaginator', pageNo,result.totalCount,pageSize,loadCompany);
+                var trHtmls = [];
+                $.each(result.items, function(index,item){
+                    trHtmls.push('<tr>');
+                    trHtmls.push('<td style="width: 50px;text-align: center;">');
+                    trHtmls.push(pageNo * pageSize +index+1);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    trHtmls.push(item.day);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: left;">');
+                    trHtmls.push(item.companyName);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: left;">');
+                    trHtmls.push(item.host);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: right;">');
+                    trHtmls.push(item.count);
+                    trHtmls.push('</td>');
+                    trHtmls.push('</tr>');
+                });
+                $('#companyBody').empty().html(trHtmls.join(''));
+                $.each($('#companyBody tr'), function(index, tr){
+                    $.data(tr,'item', result.items[index]);
+                });
+            });
+        }
+
+
+        function renderPaginator(ulId,pageNo, totalCount, pageSize ,load){
+            var $ul = $('#'+ulId).empty();
+            var totalPage = totalCount % pageSize === 0 ? parseInt(totalCount/pageSize) : parseInt(totalCount/pageSize) + 1;
+            totalPage = totalPage ? totalPage : 0;
+            if(totalPage === 0){
+                pageNo = 0;
+            }else if(pageNo > totalPage){
+                pageNo = totalPage;
+            }else if(pageNo < 1 && totalPage != 0){
+                pageNo = 0;
+            }
+            //
+            var $prev = $('<li><a>«</a></li>');
+            if(pageNo<=0){
+                $prev.addClass('disabled');
+            }else{
+                $prev.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo-1,pageSize)
+                });
+            }
+            $ul.append($prev);
+            /////
+            var list = [1];
+            for(var i= 0; i < 5; i++){
+                var no = pageNo - 2 + i;
+                if(i==0 && no > 3){
+                    list.push('...');
+                }
+                if(no > 1 && no <= totalPage-1){
+                    list.push(no);
+                }
+            }
+            if(pageNo+2 < totalPage-1){
+                list.push('...');
+            }
+            if(totalPage>1){
+                list.push(totalPage);
+            }
+            $.each(list, function(index, item){
+                var $li = $('<li><a></a></li>');
+                if(item === '...'){
+                    $li.find('a').text('...');
+                }else if(item === pageNo+1){
+                    $li.addClass('active').find('a').text(item);
+                }else{
+                    $li.find('a').text(item).prop('title','第'+item+'页').on('click', function(e){
+                        e.preventDefault();
+                        load(item-1,pageSize);
+                    });
+                }
+                $ul.append($li);
+            });
+            //
+            var $next = $('<li><a title="下一页">»</a></li>');
+            if(pageNo+1>=totalPage){
+                $next.addClass('disabled');
+            }else{
+                $next.find('a').on('click', function(e){
+                    e.preventDefault();
+                    load(pageNo+1,pageSize);
+                });
+            }
+            $ul.append($next);
+        }
