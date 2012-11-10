@@ -77,8 +77,10 @@ block script
     script(src='http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.1.7/src/markerwithlabel_packed.js')
     script(src='/js/highcharts/highcharts.js')
     script
+        var map;
+        var markers = [];
         $(function () {
-            var map;
+
             $('.tabs a').on("click", function(e){
                 $('.tabs a').removeClass('selected');
                 $(this).addClass('selected');
@@ -91,31 +93,16 @@ block script
                       zoom: 4,
                       mapTypeId: google.maps.MapTypeId.ROADMAP
                     };
+
                     map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-                    $.ajax({
-                        url: '/manage/statistics/gis/provinceCount',
-                        dataType: 'json',
-                        cache: false
-                    }).done(function(results){
-                        var items = results.items;
-                        for(var i=0; i<items.length; i++){
-                            var r = items[i];
-                            if(r.gisInfo){
-                                var marker = new MarkerWithLabel({
-                                    position: new google.maps.LatLng(r.gisInfo.lat, r.gisInfo.lng),
-                                    draggable: false,
-                                    raiseOnDrag: false,
-                                    map: map,
-                                    title:r.province,
-                                    labelContent: r.count,
-                                    labelAnchor: new google.maps.Point(20, 0),
-                                    labelClass: "labels", // the CSS class for the label
-                                    labelStyle: {opacity: 1.00}
-                                });
-                            }
+                    loadMapMarker('省');
+                    google.maps.event.addListener(map, 'zoom_changed', function() {
+                        if(map.getZoom()>6 && map.level === '省'){
+                            loadMapMarker('市');
+                        }else if(map.getZoom()<=6 && map.level === '市'){
+                            loadMapMarker('省');
                         }
                     });
-
 
                 }else if(index === 2){
 
@@ -180,3 +167,55 @@ block script
             });
 
         });
+
+        function addMarker(item) {
+            var marker = new MarkerWithLabel({
+                position: new google.maps.LatLng(item.gisInfo.lat, item.gisInfo.lng),
+                draggable: false,
+                raiseOnDrag: false,
+                map: map,
+                title:item.name,
+                labelContent: item.count,
+                labelAnchor: new google.maps.Point(20, 0),
+                labelClass: "labels", // the CSS class for the label
+                labelStyle: {opacity: 1.00}
+            });
+            markers.push(marker);
+        }
+
+        function setAllMap(map) {
+            for (var i = 0; i < markers.length; i++) {
+              markers[i].setMap(map);
+            }
+        }
+
+        function clearOverlays() {
+            setAllMap(null);
+            markers = [];
+        }
+
+        function loadMapMarker(level){
+            var url = '';
+            if(level === '省'){
+                url = '/manage/statistics/gis/provinceCount';
+            }else if(level === '市'){
+                url = '/manage/statistics/gis/cityCount';
+            }
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                cache: false
+            }).done(function(results){
+                clearOverlays();
+                var items = results.items;
+                for(var i=0; i<items.length; i++){
+                    var r = items[i];
+                    if(r.gisInfo){
+                        addMarker(r);
+                    }
+                }
+                map.level = level;
+            });
+
+        }
+

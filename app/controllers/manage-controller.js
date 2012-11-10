@@ -339,7 +339,81 @@ module.exports = function(app){
                 var cw = items.length;
                 for(var i=0; i<items.length; i++){
                     (function(t){
-                        findCoordinate(items[t].province,function(err,c){
+                        findCoordinate(items[t].province,'省',function(err,c){
+                            items[t].gisInfo = c;
+                            if(--cw == 0){
+                                res.send({items: items});
+                            }
+                        });
+                    })(i);
+                }
+
+
+            }
+            if(results.length === 0){
+                callback();
+            }
+
+            for(var i=0; i<results.length; i++){
+                var r = results[i];
+
+                if(!r._id){
+                    --waiting;
+                    continue;
+                }
+                (function(t){
+                    IpInfo.findById(t._id, function(err, ipInfo){
+                        t.ipInfo = ipInfo;
+                        if(--waiting == 0){
+                            callback();
+                        }
+                    });
+                })(r);
+            }
+        });
+    });
+
+    app.get('/manage/statistics/gis/cityCount', function(req, res){
+        var o = {
+            map: function(){
+                emit(this.ipInfo,1);
+            },
+            reduce: function(k, vals){
+                var total = 0;
+                for ( var i=0; i<vals.length; i++ )
+                    total += vals[i];
+                return total;
+            }
+        };
+        var waiting = 0;
+        Access.mapReduce(o, function(err, results){
+            waiting = results.length;
+            function callback(){
+                var items = [];
+                for(var i=0; i<results.length; i++){
+                    if(!results[i].ipInfo){
+                        continue;
+                    }
+                    var item = null;
+                    for(var j=0; j<items.length; j++){
+                        if(results[i].ipInfo && results[i].ipInfo.city === items[j].name){
+                            item = items[j];
+                            item.count += results[i].value;
+                        }
+                    }
+                    if(!item && results[i].ipInfo){
+                        item = {
+                            name: results[i].ipInfo.city,
+                            count: results[i].value
+
+                        }
+                        items.push(item);
+                    }
+                }
+                var cw = items.length;
+                for(var i=0; i<items.length; i++){
+                    (function(t){
+                        findCoordinate(items[t].name,'市',function(err,c){
                             items[t].gisInfo = c;
                             if(--cw == 0){
                                 res.send({items: items});
@@ -456,8 +530,8 @@ module.exports = function(app){
 
 
     var http = require('http');
-    function findCoordinate(name, callback){
-        GisInfo.findOne({name:name}, function(err, gi){
+    function findCoordinate(name, level, callback){
+        GisInfo.findOne({name:name,level:level}, function(err, gi){
             if(gi){
                 callback(null, gi);
             }else{
@@ -479,7 +553,7 @@ module.exports = function(app){
                                     name: name,
                                     lng: coordinates[0],
                                     lat: coordinates[1],
-                                    level: '省'
+                                    level: level
                                 });
                                 gisInfo.save(function(err){
                                     callback(null, gisInfo);
