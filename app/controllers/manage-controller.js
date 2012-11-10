@@ -1,5 +1,6 @@
 
 module.exports = function(app){
+
     var fs = require('fs');
     var handlebars = require("handlebars");
     var dateFormat = require('dateformat');
@@ -8,6 +9,8 @@ module.exports = function(app){
     var AccessControl = mongoose.model('AccessControl');
     var User = mongoose.model('User');
     var Access = mongoose.model('Access');
+    var IpInfo = mongoose.model('IpInfo');
+    var GisInfo = mongoose.model('GisInfo');
 
     function restrict(req, res, next) {
         if (req.session.user) {
@@ -296,6 +299,80 @@ module.exports = function(app){
         })
     });
 
+    app.get('/manage/statistics/gis/provinceCount', function(req, res){
+        var o = {
+            map: function(){
+                emit(this.ipInfo,1);
+            },
+            reduce: function(k, vals){
+                var total = 0;
+                for ( var i=0; i<vals.length; i++ )
+                    total += vals[i];
+                return total;
+            }
+        };
+        var waiting = 0;
+        Access.mapReduce(o, function(err, results){
+            waiting = results.length;
+            function callback(){
+                var items = [];
+                for(var i=0; i<results.length; i++){
+                    if(!results[i].ipInfo){
+                        continue;
+                    }
+                    var item = null;
+                    for(var j=0; j<items.length; j++){
+                        if(results[i].ipInfo && results[i].ipInfo.province === items[j].province){
+                            item = items[j];
+                            item.count += results[i].value;
+                        }
+                    }
+                    if(!item && results[i].ipInfo){
+                        item = {
+                            province: results[i].ipInfo.province,
+                            count: results[i].value
+
+                        }
+                        items.push(item);
+                    }
+                }
+                var cw = items.length;
+                for(var i=0; i<items.length; i++){
+                    (function(t){
+                        findCoordinate(items[t].province,function(err,c){
+                            items[t].gisInfo = c;
+                            if(--cw == 0){
+                                res.send({items: items});
+                            }
+                        });
+                    })(i);
+                }
+
+
+            }
+            if(results.length === 0){
+                callback();
+            }
+
+            for(var i=0; i<results.length; i++){
+                var r = results[i];
+
+                if(!r._id){
+                    --waiting;
+                    continue;
+                }
+                (function(t){
+                    IpInfo.findById(t._id, function(err, ipInfo){
+                        t.ipInfo = ipInfo;
+                        if(--waiting == 0){
+                            callback();
+                        }
+                    });
+                })(r);
+            }
+        });
+    });
+
     app.get('/manage/user', restrict, user, function(req, res){
         res.render('manage/user', {
             title : '访问统计'
@@ -376,4 +453,55 @@ module.exports = function(app){
 
             })
     });
+
+
+    var http = require('http');
+    function findCoordinate(name, callback){
+        GisInfo.findOne({name:name}, function(err, gi){
+            if(gi){
+                callback(null, gi);
+            }else{
+                var options = {
+                    host: 'maps.google.com',
+                    port: 80,
+                    path: '/maps/geo?q='+name,
+                    method: 'POST'
+                };
+                http.request(options,function(res) {
+                    res.setEncoding('utf8');
+                    res.on('data', function (data) {
+                        try{
+                            var resultData = JSON.parse(data);
+                            var gisInfo = null;
+                            if(resultData && resultData.Placemark && resultData.Placemark.length != 0 && resultData.Placemark[0].Point && resultData.Placemark[0].Point.coordinates){
+                                var coordinates = resultData.Placemark[0].Point.coordinates;
+                                gisInfo = new GisInfo({
+                                    name: name,
+                                    lng: coordinates[0],
+                                    lat: coordinates[1],
+                                    level: '省'
+                                });
+                                gisInfo.save(function(err){
+                                    callback(null, gisInfo);
+                                });
+
+                            }else{
+                                callback(null, gisInfo)
+                            }
+
+                        }catch(err){
+                            console.log('problem with request: ' + err.message);
+                            callback(err, null);
+                        }
+                    });
+                }).on('error', function(err) {
+                    console.log('problem with request: ' + err.message);
+                    callback(err, null);
+                }).end();
+            }
+        });
+
+
+
+    }
 };

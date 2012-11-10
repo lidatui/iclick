@@ -12,16 +12,15 @@ block style
             height: 600px;
             margin: 0 auto ;
             border: 1px solid #b8bcc0;
+            margin-bottom: 40px;
         }
         .labels {
             color: black;
-            background-color: transparent;
-            font-family: "Lucida Grande", "Arial", sans-serif;
-            font-size: 10px;
+            background-color: #fff;
             font-weight: bold;
             text-align: center;
-            width: 100px;
-            border: 0;
+            width: 40px;
+            border: 1px solid #ccc;
         }
 
 block body
@@ -89,35 +88,35 @@ block script
                     var pos = new google.maps.LatLng(36.6509970, 117.1204970);
                     var mapOptions = {
                       center: pos,
-                      zoom: 13,
+                      zoom: 4,
                       mapTypeId: google.maps.MapTypeId.ROADMAP
                     };
                     map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-                    var marker = new google.maps.Marker({
-                        position: pos,
-                        map: map,
-                        title: "354万"
+                    $.ajax({
+                        url: '/manage/statistics/gis/provinceCount',
+                        dataType: 'json',
+                        cache: false
+                    }).done(function(results){
+                        var items = results.items;
+                        for(var i=0; i<items.length; i++){
+                            var r = items[i];
+                            if(r.gisInfo){
+                                var marker = new MarkerWithLabel({
+                                    position: new google.maps.LatLng(r.gisInfo.lat, r.gisInfo.lng),
+                                    draggable: false,
+                                    raiseOnDrag: false,
+                                    map: map,
+                                    title:r.province,
+                                    labelContent: r.count,
+                                    labelAnchor: new google.maps.Point(20, 0),
+                                    labelClass: "labels", // the CSS class for the label
+                                    labelStyle: {opacity: 1.00}
+                                });
+                            }
+                        }
                     });
 
-                    var contentString = "<b>城市:</b> 济南 <br/> <b>访问量:</b> 345万";
-                        var infowindow = new google.maps.InfoWindow({
-                            content: contentString
-                        });
-                    //提示事件绑定
-                    google.maps.event.addListener(marker, 'click', function() {
-                        infowindow.open(map,marker);
-                    })
 
-                    var marker1 = new MarkerWithLabel({
-                        position: new google.maps.LatLng(36.0670820,120.3826400),
-                        draggable: true,
-                        raiseOnDrag: true,
-                        map: map,
-                        labelContent: "3569",
-                        labelAnchor: new google.maps.Point(50, 32),
-                        labelClass: "labels", // the CSS class for the label
-                        labelStyle: {opacity: 1.00}
-                    });
                 }else if(index === 2){
 
                 }
