@@ -61,7 +61,7 @@ module.exports = function(app){
                 var options = {
                     host: 'int.dpool.sina.com.cn',
                     port: 80,
-                    path: '/iplookup/iplookup.php?format=json&ip='+'60.212.48.23',
+                    path: '/iplookup/iplookup.php?format=json&ip='+ipAddress,
                     method: 'POST'
                 };
                 http.request(options,function(reqLookup) {
