@@ -16,6 +16,7 @@ module.exports = function(app){
         req.query['access'] = access;
         //访问权限
         access.url = req.query['url'];
+        access.host = getHostname(access.url);
         var urlObject = url.parse(access.url);
         //console.log('request url: ' + urlObject.hostname);
         AccessControl
@@ -141,5 +142,14 @@ module.exports = function(app){
         var part4 = ((num >> 24) & 255);
 
         return part4 + "." + part3 + "." + part2 + "." + part1;
+    }
+
+    function getHostname(str) {
+        var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
+        var host = str.match(re)[1].toString().toLowerCase();
+        if(host.charAt(host.length-1) === '.'){
+            host = host.substr(0,host.length-1);
+        }
+        return host;
     }
 }

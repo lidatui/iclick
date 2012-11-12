@@ -363,17 +363,12 @@ module.exports = function(app){
 
         var o = {
             map: function(){
-                function getHostname(str) {
-                    var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
-                    return str.match(re)[1].toString();
-                }
                 var d = this._id.getTimestamp();
                 var month = d.getMonth() < 10 ? '0'+ d.getMonth(): d.getMonth();
                 var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
                 var day = d.getFullYear()+'-'+ month +'-'+ date;
-                var host = getHostname(this.url);
                 emit({
-                    day:day, host: host
+                    day:day, host: this.host
                 },{count: 1});
             },
             reduce: function(k, vals){
@@ -481,6 +476,17 @@ module.exports = function(app){
             ,l1: false,l2: false,l3: false,l4: false,l5: false,l6: true
         });
     });
+
+//    app.get('/manage/access/removeAll',restrict,access, function(req, res){
+//        Access.remove({}).exec(function(err,obj){
+//            res.render('manage/access', {
+//                title : '访问记录'
+//                ,description: 'access Description'
+//                ,author: 'miemiedev'
+//                ,l1: false,l2: false,l3: false,l4: false,l5: false,l6: true
+//            });
+//        });
+//    });
 
     app.get('/manage/access/list',restrict,access, function(req, res){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
