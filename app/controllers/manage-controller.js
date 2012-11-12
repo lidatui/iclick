@@ -311,7 +311,8 @@ module.exports = function(app){
                 for ( var i=0; i<vals.length; i++ )
                     total += vals[i];
                 return total;
-            }
+            },
+            query: { 'accessControl.siteName': req.query["siteName"]}
         };
         Access.mapReduce(o, function(err, results){
             var waiting = results.length;
@@ -329,6 +330,7 @@ module.exports = function(app){
     });
 
     app.get('/manage/statistics/gis/cityCount', restrict, statistics, function(req, res){
+
         var o = {
             map: function(){
                 if(this.ipInfo && this.ipInfo.city){
@@ -340,7 +342,8 @@ module.exports = function(app){
                 for ( var i=0; i<vals.length; i++ )
                     total += vals[i];
                 return total;
-            }
+            },
+            query: { 'accessControl.siteName': req.query["siteName"]}
         };
         Access.mapReduce(o, function(err, results){
             var waiting = results.length;

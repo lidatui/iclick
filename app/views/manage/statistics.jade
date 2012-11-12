@@ -201,9 +201,9 @@ block script
         function loadMapMarker(level){
             var url = '';
             if(level === '省'){
-                url = '/manage/statistics/gis/provinceCount';
+                url = '/manage/statistics/gis/provinceCount?siteName=本地站点';
             }else if(level === '市'){
-                url = '/manage/statistics/gis/cityCount';
+                url = '/manage/statistics/gis/cityCount?siteName=本地站点';
             }
             $.ajax({
                 url: url,
