@@ -302,7 +302,9 @@ module.exports = function(app){
     app.get('/manage/statistics/gis/provinceCount', restrict, statistics, function(req, res){
         var o = {
             map: function(){
-                emit(this.ipInfo,1);
+                if(this.ipInfo && this.ipInfo.province){
+                    emit(this.ipInfo.province,1);
+                }
             },
             reduce: function(k, vals){
                 var total = 0;
@@ -311,64 +313,17 @@ module.exports = function(app){
                 return total;
             }
         };
-        var waiting = 0;
         Access.mapReduce(o, function(err, results){
-            waiting = results.length;
-            function callback(){
-                var items = [];
-                for(var i=0; i<results.length; i++){
-                    if(!results[i].ipInfo){
-                        continue;
-                    }
-                    var item = null;
-                    for(var j=0; j<items.length; j++){
-                        if(results[i].ipInfo && results[i].ipInfo.province === items[j].province){
-                            item = items[j];
-                            item.count += results[i].value;
-                        }
-                    }
-                    if(!item && results[i].ipInfo){
-                        item = {
-                            province: results[i].ipInfo.province,
-                            count: results[i].value
-
-                        }
-                        items.push(item);
-                    }
-                }
-                var cw = items.length;
-                for(var i=0; i<items.length; i++){
-                    (function(t){
-                        findCoordinate(items[t].province,'省',function(err,c){
-                            items[t].gisInfo = c;
-                            if(--cw == 0){
-                                res.send({items: items});
-                            }
-                        });
-                    })(i);
-                }
-
-
-            }
-            if(results.length === 0){
-                callback();
-            }
-
+            var waiting = results.length;
             for(var i=0; i<results.length; i++){
-                var r = results[i];
-
-                if(!r._id){
-                    --waiting;
-                    continue;
-                }
                 (function(t){
-                    IpInfo.findById(t._id, function(err, ipInfo){
-                        t.ipInfo = ipInfo;
+                    findCoordinate(results[t]._id,'省',function(err,c){
+                        results[t].gisInfo = c;
                         if(--waiting == 0){
-                            callback();
+                            res.send({items: results});
                         }
                     });
-                })(r);
+                })(i);
             }
         });
     });
@@ -376,7 +331,9 @@ module.exports = function(app){
     app.get('/manage/statistics/gis/cityCount', restrict, statistics, function(req, res){
         var o = {
             map: function(){
-                emit(this.ipInfo,1);
+                if(this.ipInfo && this.ipInfo.city){
+                    emit(this.ipInfo.city,1);
+                }
             },
             reduce: function(k, vals){
                 var total = 0;
@@ -385,64 +342,17 @@ module.exports = function(app){
                 return total;
             }
         };
-        var waiting = 0;
         Access.mapReduce(o, function(err, results){
-            waiting = results.length;
-            function callback(){
-                var items = [];
-                for(var i=0; i<results.length; i++){
-                    if(!results[i].ipInfo){
-                        continue;
-                    }
-                    var item = null;
-                    for(var j=0; j<items.length; j++){
-                        if(results[i].ipInfo && results[i].ipInfo.city === items[j].name){
-                            item = items[j];
-                            item.count += results[i].value;
-                        }
-                    }
-                    if(!item && results[i].ipInfo){
-                        item = {
-                            name: results[i].ipInfo.city,
-                            count: results[i].value
-
-                        }
-                        items.push(item);
-                    }
-                }
-                var cw = items.length;
-                for(var i=0; i<items.length; i++){
-                    (function(t){
-                        findCoordinate(items[t].name,'市',function(err,c){
-                            items[t].gisInfo = c;
-                            if(--cw == 0){
-                                res.send({items: items});
-                            }
-                        });
-                    })(i);
-                }
-
-
-            }
-            if(results.length === 0){
-                callback();
-            }
-
+            var waiting = results.length;
             for(var i=0; i<results.length; i++){
-                var r = results[i];
-
-                if(!r._id){
-                    --waiting;
-                    continue;
-                }
                 (function(t){
-                    IpInfo.findById(t._id, function(err, ipInfo){
-                        t.ipInfo = ipInfo;
+                    findCoordinate(results[t]._id,'市',function(err,c){
+                        results[t].gisInfo = c;
                         if(--waiting == 0){
-                            callback();
+                            res.send({items: results});
                         }
                     });
-                })(r);
+                })(i);
             }
         });
     });
@@ -577,7 +487,6 @@ module.exports = function(app){
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
         Access
             .find({})
-            .populate('ipInfo')
             .limit(pageSize)
             .skip(pageSize * pageNo)
             .sort('-_id')
