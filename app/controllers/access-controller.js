@@ -27,12 +27,14 @@ module.exports = function(app){
                 var ac;
                 for(var i=0; i< acs.length; i++){
                     if(urlObject.hostname.indexOf(acs[i].host) != -1){
-                        ac = acs[i];
-                        break;
+                        if(!ac || ac.host < acs[i].host){
+                            ac = acs[i];
+                        }
                     }
                 }
                 if(ac){
                     req.query['template'] = ac.template;
+                    access.accessControl = ac;
                     next();
                 }else{
                     res.jsonp({ result: '您没有权限访问!' });
