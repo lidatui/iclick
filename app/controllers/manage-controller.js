@@ -307,7 +307,7 @@ module.exports = function(app){
     });
 
     app.get('/manage/statistics/gis', function(req, res){
-        var acId = req.query["siteId"];
+        var host = req.query["host"];
         var level = req.query["level"];
         var startDate = new Date(req.query["startDate"]);
         var endDate = new Date ( req.query["endDate"] );
@@ -326,7 +326,7 @@ module.exports = function(app){
                     total += vals[i];
                 return total;
             },
-            query: { 'accessControl._id': mongoose.Types.ObjectId(acId), '_id': {$gte: startDate,$lt: endDate}}
+            query: { 'accessControl.host':host, '_id': {$gte: startDate,$lt: endDate}}
         };
 
         if(level == '市'){
@@ -360,16 +360,13 @@ module.exports = function(app){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
 
-        var acId = req.query["siteId"];
+        var host = req.query["host"];
         var startDate = new Date(req.query["startDate"]);
         var endDate = new Date ( req.query["endDate"] );
         endDate.setDate ( endDate.getDate() + 1 );
         startDate = objectIdWithTimestamp(startDate);
         endDate = objectIdWithTimestamp(endDate);
 
-        if(acId){
-            acId = mongoose.Types.ObjectId(acId)
-        }
 
         var o = {
             map: function(){
@@ -392,8 +389,8 @@ module.exports = function(app){
             verbose: true
         };
 
-        if(acId){
-            o.query = { 'accessControl._id': mongoose.Types.ObjectId(acId), '_id': {$gte: startDate,$lt: endDate}};
+        if(host){
+            o.query = { 'accessControl.host': host, '_id': {$gte: startDate,$lt: endDate}};
         }else{
             o.query = { '_id': {$gte: startDate,$lt: endDate}};
         }
