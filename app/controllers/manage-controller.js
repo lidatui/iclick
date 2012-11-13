@@ -307,11 +307,11 @@ module.exports = function(app){
     });
 
     app.get('/manage/statistics/gis', function(req, res){
-        var startDate = new Date(req.query["date"]);
         var acId = req.query["siteId"];
         var level = req.query["level"];
-        var endDate = new Date ( startDate );
-        endDate.setDate ( startDate.getDate() + 1 );
+        var startDate = new Date(req.query["startDate"]);
+        var endDate = new Date ( req.query["endDate"] );
+        endDate.setDate ( endDate.getDate() + 1 );
         startDate = objectIdWithTimestamp(startDate);
         endDate = objectIdWithTimestamp(endDate);
         var o = {

@@ -42,8 +42,10 @@ block body
             div#dayChart.chart
         section(style='display:none;')
             form.form-inline
-                label(for="mapDate",style="margin-right:5px;") 时间：
-                input#mapDate.input-small(type="text")
+                label(for="mapStartDate",style="margin-right:5px;") 时间：
+                input#mapStartDate.input-small(type="text")
+                label(for="mapEndDate",style="margin-right:5px;margin-left:5px;") -
+                input#mapEndDate.input-small(type="text")
                 label(for="mapSite",style="margin-right:5px;margin-left:15px;") 站点：
                 select#mapSite
                     for site in sites
@@ -104,11 +106,16 @@ block script
         var map;
         var markers = [];
         $(function () {
-            $('#mapDate').datepicker({
+            $('#mapStartDate').datepicker({
                 format: 'yyyy-mm-dd',
                 language: 'zh-CN'
             });
-            $('#mapDate').datepicker('setDate',new Date());
+            $('#mapStartDate').datepicker('setDate',new Date());
+            $('#mapEndDate').datepicker({
+                format: 'yyyy-mm-dd',
+                language: 'zh-CN'
+            });
+            $('#mapEndDate').datepicker('setDate',new Date());
 
             $('#mapSubmit').on('click', function(){
                 if(map.getZoom()>6){
@@ -254,7 +261,8 @@ block script
                 url: '/manage/statistics/gis',
                 dataType: 'json',
                 data: {
-                    date: $('#mapDate').val(),
+                    startDate: $('#mapStartDate').val(),
+                    endDate: $('#mapEndDate').val(),
                     siteId: $('#mapSite').val(),
                     level: level
                 },
