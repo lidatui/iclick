@@ -1,5 +1,6 @@
 extends ../layout
 block style
+    link(rel='stylesheet', href='/bootstrap/css/datepicker.css')
     style
         .chart{
             min-width: 400px;
@@ -40,7 +41,15 @@ block body
             p 描述
             div#dayChart.chart
         section(style='display:none;')
-            p 描述
+            form.form-inline
+                label(for="mapDate",style="margin-right:5px;") 时间:
+                input#mapDate.input-small(type="text")
+                label(for="mapSite",style="margin-right:5px;margin-left:10px;") 站点:
+                select#mapSite
+                    each site in sites
+                        option(value="#{site._id}") #{site.companyName}-#{site.siteName}-#{site.host}
+
+                button#mapSubmit.btn.btn-small.btn-primary(type="button",style="margin-left:10px;") 查询
             div#map_canvas.maps
         section(style='display:none;')
             p 描述
@@ -78,10 +87,26 @@ block script
     script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBrDF1WpWGJlzMyNUs4rOZ-Lgz3nNYb6PQ&sensor=true')
     script(src='http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.1.7/src/markerwithlabel_packed.js')
     script(src='/js/highcharts/highcharts.js')
+    script(src='/bootstrap/js/bootstrap-datepicker.js')
+    script(src='/bootstrap/js/bootstrap-datepicker.zh-CN.js')
     script
         var map;
         var markers = [];
         $(function () {
+            $('#mapDate').datepicker({
+                format: 'yyyy-mm-dd',
+                language: 'zh-CN'
+            });
+            $('#mapDate').datepicker('setDate',new Date());
+
+            $('#mapSubmit').on('click', function(){
+                if(map.getZoom()>6){
+                    loadMapMarker('市');
+                }else if(map.getZoom()<=6){
+                    loadMapMarker('省');
+                }
+            });
+
 
             $('.tabs a').on("click", function(e){
                 $('.tabs a').removeClass('selected');
@@ -172,6 +197,7 @@ block script
 
         });
 
+
         function addMarker(item) {
             var marker = new MarkerWithLabel({
                 position: new google.maps.LatLng(item.gisInfo.lat, item.gisInfo.lng),
@@ -199,15 +225,14 @@ block script
         }
 
         function loadMapMarker(level){
-            var url = '';
-            if(level === '省'){
-                url = '/manage/statistics/gis/provinceCount?siteName=本地站点';
-            }else if(level === '市'){
-                url = '/manage/statistics/gis/cityCount?siteName=本地站点';
-            }
             $.ajax({
-                url: url,
+                url: '/manage/statistics/gis',
                 dataType: 'json',
+                data: {
+                    date: $('#mapDate').val(),
+                    siteId: $('#mapSite').val(),
+                    level: level
+                },
                 cache: false
             }).done(function(results){
                 clearOverlays();

@@ -250,12 +250,19 @@ module.exports = function(app){
     });
 
     app.get('/manage/statistics', restrict, statistics, function(req, res){
-        res.render('manage/statistics', {
-            title : '访问统计'
-            ,description: 'statistics Description'
-            ,author: 'miemiedev'
-            ,l1: true,l2: false,l3: false,l4: false,l5: false,l6: false
+
+        AccessControl.find({}).sort('companyName').exec(function (err, acs) {
+            res.render('manage/statistics', {
+                title : '访问统计'
+                ,description: 'statistics Description'
+                ,author: 'miemiedev'
+                ,l1: true,l2: false,l3: false,l4: false,l5: false,l6: false
+                ,sites: acs
+            });
         });
+
+
+
     });
 
     app.get('/manage/statistics/dayCount', restrict, statistics, function(req, res){
@@ -299,7 +306,14 @@ module.exports = function(app){
         })
     });
 
-    app.get('/manage/statistics/gis/provinceCount', restrict, statistics, function(req, res){
+    app.get('/manage/statistics/gis', restrict, statistics, function(req, res){
+        var startDate = new Date(req.query["date"]);
+        var acId = req.query["siteId"];
+        var level = req.query["level"];
+        var endDate = new Date ( startDate );
+        endDate.setDate ( startDate.getDate() + 1 );
+        startDate = objectIdWithTimestamp(startDate);
+        endDate = objectIdWithTimestamp(endDate);
         var o = {
             map: function(){
                 if(this.ipInfo && this.ipInfo.province){
@@ -312,44 +326,25 @@ module.exports = function(app){
                     total += vals[i];
                 return total;
             },
-            query: { 'accessControl.siteName': req.query["siteName"]}
+            query: { 'accessControl._id': mongoose.Types.ObjectId(acId), '_id': {$gte: startDate,$lt: endDate}}
         };
-        Access.mapReduce(o, function(err, results){
-            var waiting = results.length;
-            for(var i=0; i<results.length; i++){
-                (function(t){
-                    findCoordinate(results[t]._id,'省',function(err,c){
-                        results[t].gisInfo = c;
-                        if(--waiting == 0){
-                            res.send({items: results});
-                        }
-                    });
-                })(i);
-            }
-        });
-    });
 
-    app.get('/manage/statistics/gis/cityCount', restrict, statistics, function(req, res){
-
-        var o = {
-            map: function(){
+        if(level == '市'){
+            o.map = function(){
                 if(this.ipInfo && this.ipInfo.city){
                     emit(this.ipInfo.city,1);
                 }
-            },
-            reduce: function(k, vals){
-                var total = 0;
-                for ( var i=0; i<vals.length; i++ )
-                    total += vals[i];
-                return total;
-            },
-            query: { 'accessControl.siteName': req.query["siteName"]}
-        };
+            }
+        }
+
         Access.mapReduce(o, function(err, results){
             var waiting = results.length;
+            if(!results || results.length === 0){
+                res.send({items: results});
+            }
             for(var i=0; i<results.length; i++){
                 (function(t){
-                    findCoordinate(results[t]._id,'市',function(err,c){
+                    findCoordinate(results[t]._id,level,function(err,c){
                         results[t].gisInfo = c;
                         if(--waiting == 0){
                             res.send({items: results});
@@ -359,6 +354,7 @@ module.exports = function(app){
             }
         });
     });
+
 
     app.get('/manage/statistics/companyCount', restrict, statistics, function(req, res){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
@@ -562,5 +558,21 @@ module.exports = function(app){
 
 
 
+    }
+
+    function objectIdWithTimestamp(timestamp)
+    {
+        // Convert string date to Date object (otherwise assume timestamp is a date)
+        if (typeof(timestamp) == 'string') {
+            timestamp = new Date(timestamp);
+        }
+
+        // Convert date object to hex seconds since Unix epoch
+        var hexSeconds = Math.floor(timestamp/1000).toString(16);
+
+        // Create an ObjectId with that hex timestamp
+        var constructedObjectId = mongoose.Types.ObjectId(hexSeconds + "0000000000000000");
+
+        return constructedObjectId
     }
 };
