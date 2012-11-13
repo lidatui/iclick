@@ -42,17 +42,28 @@ block body
             div#dayChart.chart
         section(style='display:none;')
             form.form-inline
-                label(for="mapDate",style="margin-right:5px;") 时间:
+                label(for="mapDate",style="margin-right:5px;") 时间：
                 input#mapDate.input-small(type="text")
-                label(for="mapSite",style="margin-right:5px;margin-left:10px;") 站点:
+                label(for="mapSite",style="margin-right:5px;margin-left:15px;") 站点：
                 select#mapSite
-                    each site in sites
+                    for site in sites
                         option(value="#{site._id}") #{site.companyName}-#{site.siteName}-#{site.host}
 
                 button#mapSubmit.btn.btn-small.btn-primary(type="button",style="margin-left:10px;") 查询
             div#map_canvas.maps
         section(style='display:none;')
-            p 描述
+            form.form-inline
+                label(for="cpyStartDate",style="margin-right:5px;") 时间：
+                input#cpyStartDate.input-small(type="text")
+                label(for="cpyEndDate",style="margin-right:5px;margin-left:5px;") -
+                input#cpyEndDate.input-small(type="text")
+                label(for="cpySite",style="margin-right:5px;margin-left:15px;") 站点：
+                select#cpySite
+                    option(value="") 全部
+                    for site in sites
+                        option(value="#{site._id}") #{site.companyName}-#{site.siteName}-#{site.host}
+
+                button#cpySubmit.btn.btn-small.btn-primary(type="button",style="margin-left:10px;") 查询
             table.table.table-bordered.table-striped
                 thead
                     tr
@@ -107,6 +118,20 @@ block script
                 }
             });
 
+            $('#cpyStartDate').datepicker({
+                format: 'yyyy-mm-dd',
+                language: 'zh-CN'
+            });
+            $('#cpyStartDate').datepicker('setDate',new Date());
+
+            $('#cpyEndDate').datepicker({
+                format: 'yyyy-mm-dd',
+                language: 'zh-CN'
+            });
+            $('#cpyEndDate').datepicker('setDate',new Date());
+            $('#cpySubmit').on('click', function(){
+                loadCompany(0,20);
+            });
 
             $('.tabs a').on("click", function(e){
                 $('.tabs a').removeClass('selected');
@@ -265,8 +290,11 @@ block script
                 url: '/manage/statistics/companyCount',
                 dataType: 'json',
                 data: {
-                pageNo: pageNo,
-                pageSize: pageSize
+                    pageNo: pageNo,
+                    pageSize: pageSize,
+                    startDate: $('#cpyStartDate').val(),
+                    endDate: $('#cpyEndDate').val(),
+                    siteId: $('#cpySite').val()
                 },
                 cache: false
             }).done(function(result){

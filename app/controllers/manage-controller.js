@@ -265,7 +265,7 @@ module.exports = function(app){
 
     });
 
-    app.get('/manage/statistics/dayCount', restrict, statistics, function(req, res){
+    app.get('/manage/statistics/dayCount', function(req, res){
         var o = {};
         o.map = function () {
             var d = this._id.getTimestamp();
@@ -306,7 +306,7 @@ module.exports = function(app){
         })
     });
 
-    app.get('/manage/statistics/gis', restrict, statistics, function(req, res){
+    app.get('/manage/statistics/gis', function(req, res){
         var startDate = new Date(req.query["date"]);
         var acId = req.query["siteId"];
         var level = req.query["level"];
@@ -356,9 +356,20 @@ module.exports = function(app){
     });
 
 
-    app.get('/manage/statistics/companyCount', restrict, statistics, function(req, res){
+    app.get('/manage/statistics/companyCount',  function(req, res){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
+
+        var acId = req.query["siteId"];
+        var startDate = new Date(req.query["startDate"]);
+        var endDate = new Date ( req.query["endDate"] );
+        endDate.setDate ( endDate.getDate() + 1 );
+        startDate = objectIdWithTimestamp(startDate);
+        endDate = objectIdWithTimestamp(endDate);
+
+        if(acId){
+            acId = mongoose.Types.ObjectId(acId)
+        }
 
         var o = {
             map: function(){
@@ -380,6 +391,12 @@ module.exports = function(app){
             out: 'companyCount',
             verbose: true
         };
+
+        if(acId){
+            o.query = { 'accessControl._id': mongoose.Types.ObjectId(acId), '_id': {$gte: startDate,$lt: endDate}};
+        }else{
+            o.query = { '_id': {$gte: startDate,$lt: endDate}};
+        }
         Access.mapReduce(o, function (err, model, stats){
             model
                 .find({})
