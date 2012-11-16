@@ -19,6 +19,7 @@ block body
                                 th(style="text-align: center;") #行号
                                 th(style="text-align: left;") 公司名称
                                 th(style="text-align: left;") 站点名称
+                                th(style="text-align: left;") 站点ID
                                 th(style="text-align: left;") 站点域名
                                 th(style="text-align: left;") 设置模版
                         tbody#siteBody
@@ -246,6 +247,9 @@ block script
                     trHtmls.push('</td>');
                     trHtmls.push('<td>');
                     trHtmls.push(item.siteName);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push(item._id);
                     trHtmls.push('</td>');
                     trHtmls.push('<td>');
                     trHtmls.push(item.host);

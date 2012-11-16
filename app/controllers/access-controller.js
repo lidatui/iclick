@@ -15,29 +15,23 @@ module.exports = function(app){
         var access = new Access();
         req.query['access'] = access;
         //访问权限
-        access.url = req.query['url'];
-        access.host = getHostname(access.url);
-        var urlObject = url.parse(access.url);
-        //console.log('request url: ' + urlObject.hostname);
+        if(!req.query['h']){
+            res.jsonp({ result: "<div style='display: none;'>您没有权限访问!</div>" });
+            return;
+        }
+        access.pageInfo = req.query['h'];
+        access.host = getHostname(access.pageInfo.resource);
         AccessControl
-            .find({})
+            .findById(access.pageInfo.site_id)
             .populate('template')
-            .exec(function (err, acs) {
+            .exec(function (err, ac) {
                 if (err) return next(err);
-                var ac;
-                for(var i=0; i< acs.length; i++){
-                    if(urlObject.hostname.indexOf(acs[i].host) != -1){
-                        if(!ac || ac.host < acs[i].host){
-                            ac = acs[i];
-                        }
-                    }
-                }
                 if(ac){
                     req.query['template'] = ac.template;
                     access.accessControl = ac;
                     next();
                 }else{
-                    res.jsonp({ result: '您没有权限访问!' });
+                    res.jsonp({ result: "<div style='display: none;'>您没有权限访问!</div>" });
                 }
             });
 
@@ -96,7 +90,7 @@ module.exports = function(app){
         next();
     },function(req, res, next){
         //存储
-        //console.log('access: %s',req.query['access']);
+        console.log('access: %s',req.query['access']);
         var access = req.query['access'];
         access.save(function(err){
             if(err) return next(err);

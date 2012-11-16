@@ -307,7 +307,7 @@ module.exports = function(app){
     });
 
     app.get('/manage/statistics/gis', function(req, res){
-        var host = req.query["host"];
+        var siteId = req.query["siteId"];
         var level = req.query["level"];
         var startDate = new Date(req.query["startDate"]);
         var endDate = new Date ( req.query["endDate"] );
@@ -326,7 +326,7 @@ module.exports = function(app){
                     total += vals[i];
                 return total;
             },
-            query: { 'accessControl.host':host, '_id': {$gte: startDate,$lt: endDate}}
+            query: { 'accessControl._id':mongoose.Types.ObjectId(siteId), '_id': {$gte: startDate,$lt: endDate}}
         };
 
         if(level == '市'){
@@ -360,7 +360,7 @@ module.exports = function(app){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
 
-        var host = req.query["host"];
+        var siteId = req.query["siteId"];
         var startDate = new Date(req.query["startDate"]);
         var endDate = new Date ( req.query["endDate"] );
         endDate.setDate ( endDate.getDate() + 1 );
@@ -389,8 +389,8 @@ module.exports = function(app){
             verbose: true
         };
 
-        if(host){
-            o.query = { 'accessControl.host': host, '_id': {$gte: startDate,$lt: endDate}};
+        if(siteId){
+            o.query = { 'accessControl._id':mongoose.Types.ObjectId(siteId), '_id': {$gte: startDate,$lt: endDate}};
         }else{
             o.query = { '_id': {$gte: startDate,$lt: endDate}};
         }
