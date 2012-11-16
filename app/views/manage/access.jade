@@ -120,7 +120,11 @@ block script
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
                     trHtmls.push('<span title="');
-                    trHtmls.push(item.url);
+                    if(item.pageInfo){
+                        trHtmls.push(item.pageInfo.resource);
+                    }else{
+                        trHtmls.push(item.url);
+                    }
                     trHtmls.push('" >');
                     trHtmls.push(item.host);
                     trHtmls.push('</span>');
