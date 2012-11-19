@@ -120,8 +120,10 @@ block script
             $('#mapSubmit').on('click', function(){
                 if(map.getZoom()>6){
                     loadMapMarker('市');
-                }else if(map.getZoom()<=6){
+                }else if(map.getZoom()<=6 && map.getZoom()>3){
                     loadMapMarker('省');
+                }else if(map.getZoom()<=3){
+                    loadMapMarker('国');
                 }
             });
 
@@ -156,10 +158,12 @@ block script
                     map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
                     loadMapMarker('省');
                     google.maps.event.addListener(map, 'zoom_changed', function() {
-                        if(map.getZoom()>6 && map.level === '省'){
+                        if(map.getZoom()>6 && map.level != '市'){
                             loadMapMarker('市');
-                        }else if(map.getZoom()<=6 && map.level === '市'){
+                        }else if(map.getZoom()<=6 && map.getZoom()>3 && map.level != '省'){
                             loadMapMarker('省');
+                        }else if(map.getZoom()<=3 && map.level != '国'){
+                            loadMapMarker('国');
                         }
                     });
 

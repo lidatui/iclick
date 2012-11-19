@@ -316,8 +316,8 @@ module.exports = function(app){
         endDate = objectIdWithTimestamp(endDate);
         var o = {
             map: function(){
-                if(this.ipInfo && this.ipInfo.province){
-                    emit(this.ipInfo.province,1);
+                if(this.ipInfo && this.ipInfo.country){
+                    emit(this.ipInfo.country,1);
                 }
             },
             reduce: function(k, vals){
@@ -328,6 +328,14 @@ module.exports = function(app){
             },
             query: { 'accessControl._id':mongoose.Types.ObjectId(siteId), '_id': {$gte: startDate,$lt: endDate}}
         };
+
+        if(level == '省'){
+            o.map = function(){
+                if(this.ipInfo && this.ipInfo.province){
+                    emit(this.ipInfo.province,1);
+                }
+            }
+        }
 
         if(level == '市'){
             o.map = function(){
