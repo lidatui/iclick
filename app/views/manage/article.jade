@@ -63,6 +63,11 @@ block body
                                         label.checkbox
                                             input#tzydtHighlight(type="checkbox")
                                             span 是否高亮
+                                div.control-group
+                                    div.controls
+                                        label.checkbox
+                                            input#tzydtQa(type="checkbox")
+                                            span 是否问卷
                         div.modal-footer
                             button.btn(data-dismiss="modal",aria-hidden="true") 关闭
                             button#tzydtSave.btn.btn-primary 保存
@@ -91,6 +96,7 @@ block script
             $('#tzydtTitle').val(item.title);
             $('#tzydtTargetUrl').val(item.targetUrl);
             $('#tzydtHighlight')[0].checked = item.highlight;
+            $('#tzydtQa')[0].checked = item.qa;
 
             $('#tzydtModal').data('item',item);
             $('#tzydtModal').modal('show');
@@ -103,6 +109,7 @@ block script
             var title = $('#tzydtTitle').val();
             var targetUrl = $('#tzydtTargetUrl').val();
             var highlight = $('#tzydtHighlight')[0].checked;
+            var qa = $('#tzydtQa')[0].checked;
             if(!title || !targetUrl){
                 if(!title){
                     $('#tzydtTitle').parent().parent().addClass('error');
@@ -117,7 +124,8 @@ block script
             param = $.extend(param,{
                 title: title,
                 targetUrl: targetUrl,
-                highlight: highlight ? 1: 0
+                highlight: highlight ? 1: 0,
+                qa: qa ? 1: 0
             });
             $.ajax({
                 type: 'POST',
@@ -188,6 +196,7 @@ block script
             $('#tzydtTargetUrl').next().hide();
             $('#tzydtTargetUrl').val('');
             $('#tzydtHighlight')[0].checked = false;
+            $('#tzydtQa')[0].checked = false;
             $('#tzydtModal .modal-body .alert-error').hide();
         }
 
@@ -236,7 +245,11 @@ block script
                         trHtmls.push('style="color:#08C;" ');
                     }
                     trHtmls.push('>');
-                    trHtmls.push(item.title);
+                    if(item.qa){
+                        trHtmls.push('[问卷] '+item.title);
+                    }else{
+                        trHtmls.push('[文章] '+item.title);
+                    }
                     trHtmls.push('</a>');
                     trHtmls.push('</td>');
                     trHtmls.push('</tr>');

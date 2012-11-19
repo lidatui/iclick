@@ -2,11 +2,18 @@
 var _iclick = _iclick || [];
 (function () {
     var h = (_iclick['slice']) ? _iclick.slice(0) : [];
-    _iclick = {track_referrer:true, show:function (elementId) {
+    _iclick = {track_referrer:true, show:function (elementId,i,r) {
         _iclick.elementId = elementId;
         this.setCookie('_iclick_cookie', 1, 1);
         var a = this.url();
         if (a) {
+            if(i){
+                a += "&i="+i;
+            }
+            if(r){
+                a += "&r="+r;
+            }
+
             var t   = document.createElement('script');
             t.type  = 'text/javascript';
             t.async = true;

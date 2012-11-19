@@ -90,7 +90,7 @@ module.exports = function(app){
         next();
     },function(req, res, next){
         //存储
-        console.log('access: %s',req.query['access']);
+        //console.log('access: %s',req.query['access']);
         var access = req.query['access'];
         access.save(function(err){
             if(err) return next(err);
@@ -109,6 +109,16 @@ module.exports = function(app){
                     var model = article.toObject();
                     model.basePath = 'http://iclick.cloudfoundry.com';
                     model.pubDate = dateFormat(model.pubDate,'mm-dd');
+                    var tu = model.basePath + '/redirect?id='+model._id;
+                    if(article.qa){
+                        if(req.query['i']){
+                            tu += "&i="+new Buffer(new Buffer(req.query['i']).toString('ascii')).toString('base64');
+                        }
+                        if(req.query['r']){
+                            tu += "&r="+req.query['r'];
+                        }
+                    }
+                    model.targetUrl =tu;
                     var result = template(model);
                     res.jsonp({ result: result });
                 }else{

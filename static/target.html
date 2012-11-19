@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>一点通测试页面</title>
+    <title>一点通测试问卷页面</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="miemiedev">
@@ -47,9 +47,19 @@
 
 <div class="container">
 
-    <h1>投资一点通演示页面</h1>
-    <p>下面为投资一点通显示效果图，可以根据站点制定不同的模版而有不同的显示外观。</p>
-    <span id="response"></span>
+    <h1>投资一点通问卷演示页面</h1>
+    <p>姓名：<span id="name"></span>，年龄：<span id="age"></span>，性别：<span id="gender"></span></p>
+    <p>以下为问卷内容</p>
+    <hr>
+    <p>1.您知道齐鲁证券的官方网址吗？</p>
+    <ol type="A">
+        <li>www.96777.cn</li>
+        <li>www.96659.cn</li>
+        <li>www.95536.cn</li>
+        <li>www.95538.cn</li>
+    </ol>
+    <div></div>
+
 
 </div> <!-- /container -->
 
@@ -58,10 +68,39 @@
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="js/jquery-1.8.2.min.js"></script>
 <script src="bootstrap/js/bootstrap.min.js"></script>
-<script src="http://iclick.cloudfoundry.com/js/abceffgh.js"></script>
-<script id="iclick-renderer" data-site-id="50a1dbf43d86e33b0300005a" src="http://iclick.cloudfoundry.com/show.js" ></script>
+<script src="js/base64.js"></script>
 <script>
-    _iclick.show('response','小明,32,男','http://www.95538.cn');
+    console.log(Base64.decode('5bCP5piOLDI4LOeUtw=='))
+    var QueryString = function () {
+        // This function is anonymous, is executed immediately and
+        // the return value is assigned to QueryString!
+        var query_string = {};
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            // If first entry with this name
+            if (typeof query_string[pair[0]] === "undefined") {
+                query_string[pair[0]] = pair[1];
+                // If second entry with this name
+            } else if (typeof query_string[pair[0]] === "string") {
+                var arr = [ query_string[pair[0]], pair[1] ];
+                query_string[pair[0]] = arr;
+                // If third or later entry with this name
+            } else {
+                query_string[pair[0]].push(pair[1]);
+            }
+        }
+        return query_string;
+    } ();
+    $(document).ready(function(){
+        var param = Base64.decode(QueryString.i).split(",");
+        if(param){
+            $('#name').text(param[0]);
+            $('#age').text(param[1]);
+            $('#gender').text(param[2]);
+        }
+    });
 </script>
 </body>
 </html>
