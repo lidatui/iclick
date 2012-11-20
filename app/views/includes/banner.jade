@@ -14,9 +14,9 @@ nav.banner
                     li: a(href='/manage/article') 内容管理
             - if (session.user.role.accessControl)
                 - if (l3)
-                    li: a.selected 访问控制
+                    li: a.selected 生成链接
                 - else
-                    li: a(href='/manage/accessControl') 访问控制
+                    li: a(href='/manage/accessControl') 生成链接
             - if (session.user.role.template)
                 - if (l4)
                     li: a.selected 模版

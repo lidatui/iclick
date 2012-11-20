@@ -4,13 +4,13 @@ block body
     nav.nav
         div.navContent
             div.header
-                h1 访问控制
+                h1 生成链接
                 ul.tabs
                     li: a.selected 列表
             include ../includes/login
     div.main
         section
-            p 描述
+            p 设置站点与模版的对应关系，设置后可点击查看代码获取站点代码。
             div.row-fluid
                 div.span10
                     table.table.table-bordered.table-striped
@@ -19,9 +19,8 @@ block body
                                 th(style="text-align: center;") #行号
                                 th(style="text-align: left;") 公司名称
                                 th(style="text-align: left;") 站点名称
-                                th(style="text-align: left;") 站点ID
-                                th(style="text-align: left;") 站点域名
                                 th(style="text-align: left;") 设置模版
+                                th(style="text-align: center;") 页面代码
                         tbody#siteBody
                             tr
                                 td(colspan="6",style="text-align: center;") 正在加载...
@@ -47,7 +46,7 @@ block body
                                         input#siteName(type="text",placeholder="例: 融易网")
                                         span.help-inline.hide 站点名称不得为空.
                                 div.control-group
-                                    label.control-label(for="siteHost") 站点域名
+                                    label.control-label(for="siteHost") 站点域名(可选)
                                     div.controls
                                         input#siteHost(type="text",placeholder="例: 95538.cn")
                                         span.help-inline.hide 站点域名不能为空.
@@ -64,7 +63,26 @@ block body
                     button#siteAdd.btn.btn-block.btn-success(type="button") 添加
                     button#siteEdit.btn.btn-block.btn-primary(type="button") 编辑
                     button#siteRemove.btn.btn-block.btn-danger(type="button") 删除
+            div#siteCode.modal.hide(tabindex="-1", role="dialog",aria-labelledby="siteCodeLabel",aria-hidden="true")
+                div.modal-header
+                    button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+                    h3#siteCodeLabel 站点代码
+                div.modal-body
+                    pre &lt;script src="http://iclick.cloudfoundry.com/js/abceffgh.js"&gt;&lt;/script&gt;
+                        br
+                        |&lt;script id="iclick-renderer" data-site-id="
+                        span#siteId
+                        |" src="http://iclick.cloudfoundry.com/show.js" &gt;&lt;/script&gt;
+                        br
+                        |&lt;script&gt;
+                        br
+                        |_iclick.show('response','小明,32,男','http://www.95538.cn');
+                        br
+                        |&lt;/script&gt;
 
+
+                div.modal-footer
+                    button.btn(data-dismiss="modal",aria-hidden="true") 关闭
 
 block script
     script(src='/js/datejs.js')
@@ -111,7 +129,7 @@ block script
                 var host = $('#siteHost').val();
                 var item = $('#siteTemplate option:selected').data('item');
 
-                if(!companyName || !siteName || !host || !item){
+                if(!companyName || !siteName || !item){
                     if(!companyName){
                         $('#siteCompanyName').parent().parent().addClass('error');
                         $('#siteCompanyName').next().show();
@@ -119,10 +137,6 @@ block script
                     if(!siteName){
                         $('#siteName').parent().parent().addClass('error');
                         $('#siteName').next().show();
-                    }
-                    if(!host){
-                        $('#siteHost').parent().parent().addClass('error');
-                        $('#siteHost').next().show();
                     }
                     if(!item){
                         $('#siteTemplate').parent().parent().addClass('error');
@@ -187,6 +201,7 @@ block script
             });
             loadSite(0,10);
             loadTpl();
+
         });
         function clearSiteForm(){
             $('#siteCompanyName').parent().parent().removeClass('error');
@@ -249,13 +264,12 @@ block script
                     trHtmls.push(item.siteName);
                     trHtmls.push('</td>');
                     trHtmls.push('<td>');
-                    trHtmls.push(item._id);
-                    trHtmls.push('</td>');
-                    trHtmls.push('<td>');
-                    trHtmls.push(item.host);
-                    trHtmls.push('</td>');
-                    trHtmls.push('<td>');
                     trHtmls.push(item.templateName);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="width: 100px;text-align: center;">');
+                    trHtmls.push('<button type="button" data-site-id="');
+                    trHtmls.push(item._id);
+                    trHtmls.push('" class="btn btn-small btn-info">查看代码</button>');
                     trHtmls.push('</td>');
                     trHtmls.push('</tr>');
                 });
@@ -264,6 +278,13 @@ block script
 
                 $.each($('#siteBody tr'), function(index, tr){
                     $.data(tr,'item', result.items[index]);
+                });
+
+                $('#siteBody').on('click','.btn',function(e){
+                    var id = $(this).data('site-id');
+                    console.log(id);
+                    $('#siteId').text(id);
+                    $('#siteCode').modal('show');
                 });
             });
         }
