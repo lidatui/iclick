@@ -95,6 +95,20 @@ block body
                         a(href="#") 12
                     li
                         a(href="#") »
+            div#pageListModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="pageListLabel",aria-hidden="true")
+                div.modal-header
+                    button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+                    h3#pageListLabel 页面列表
+                div.modal-body
+                    p 以下为
+                        span#pageCompany(style="font-weight:bold;margin: 0 2px 0 4px;")
+                        span#pageDate(style="font-weight:bold;margin: 0 4px 0 2px;")
+                        | 的页面访问统计：
+                    ul#pageList
+                        li 正在载入...
+                div.modal-footer
+                    button.btn(data-dismiss="modal",aria-hidden="true") 关闭
+
 
 block script
     script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBrDF1WpWGJlzMyNUs4rOZ-Lgz3nNYb6PQ&sensor=true')
@@ -329,6 +343,10 @@ block script
                     trHtmls.push('<td style="width: 100px;text-align: center;">');
                     trHtmls.push('<button type="button" data-site-id="');
                     trHtmls.push(item.acId);
+                    trHtmls.push('" data-date="');
+                    trHtmls.push(item.day);
+                    trHtmls.push('" data-company-name="');
+                    trHtmls.push(item.companyName);
                     trHtmls.push('" class="btn btn-small btn-info">页面列表</button>');
                     trHtmls.push('</td>');
                     trHtmls.push('</tr>');
@@ -336,6 +354,43 @@ block script
                 $('#companyBody').empty().html(trHtmls.join(''));
                 $.each($('#companyBody tr'), function(index, tr){
                     $.data(tr,'item', result.items[index]);
+                });
+                $('#companyBody').on('click','.btn',function(e){
+                    var siteId = $(this).data('site-id');
+                    var date = $(this).data('date');
+                    var companyName = $(this).data('company-name');
+                    $('#pageDate').text(date);
+                    $('#pageCompany').text(companyName);
+                    $('#pageList').empty().html('<li>正在载入...</li>');
+                    $.ajax({
+                        url: '/manage/statistics/companyPages',
+                        dataType: 'json',
+                        data: {
+                            date: date,
+                            siteId: siteId
+                        },
+                        cache: false
+                    }).done(function(pageList){
+                        var trHtmls = [];
+                        $.each(pageList, function(index,item){
+                            trHtmls.push('<li><a target="_blank" ');
+                            trHtmls.push('href="');
+                            trHtmls.push(item._id['url'])
+                            trHtmls.push('" >');
+                            trHtmls.push(item._id['url'])
+                            trHtmls.push('</a>');
+                            trHtmls.push(' - ');
+                            trHtmls.push('<span style="color: #D14;">');
+                            trHtmls.push(item.value['count'])
+                            trHtmls.push('次</span>');
+                            trHtmls.push('</li>');
+                        });
+                        $('#pageList').empty().html(trHtmls.join(''));
+                    }).fail(function(){
+                        $('#pageList').empty().html('<li>载入出错.</li>');
+                    });
+
+                    $('#pageListModal').modal('show');
                 });
             });
         }

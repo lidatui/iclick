@@ -269,7 +269,7 @@ module.exports = function(app){
         var o = {};
         o.map = function () {
             var d = this._id.getTimestamp();
-            var month = d.getMonth() < 10 ? '0'+ d.getMonth(): d.getMonth();
+            var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
             var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
             var result = d.getFullYear()+'-'+ month +'-'+ date;
             emit(result, 1);
@@ -375,11 +375,10 @@ module.exports = function(app){
         startDate = objectIdWithTimestamp(startDate);
         endDate = objectIdWithTimestamp(endDate);
 
-
         var o = {
             map: function(){
                 var d = this._id.getTimestamp();
-                var month = d.getMonth() < 10 ? '0'+ d.getMonth(): d.getMonth();
+                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
                 var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
                 var day = d.getFullYear()+'-'+ month +'-'+ date;
                 emit({
@@ -437,6 +436,38 @@ module.exports = function(app){
 
 
 
+        });
+    });
+
+    app.get('/manage/statistics/companyPages',  function(req, res){
+        var siteId = req.query["siteId"];
+        var startDate = new Date(req.query["date"]);
+        var endDate = new Date (startDate);
+        endDate.setDate ( endDate.getDate() + 1 );
+        startDate = objectIdWithTimestamp(startDate);
+        endDate = objectIdWithTimestamp(endDate);
+
+        var o = {
+            map: function(){
+                if(this.pageInfo){
+                    emit({
+                        url:this.pageInfo.resource
+                    },{count: 1});
+                }
+
+            },
+            reduce: function(k, vals){
+                var total = 0;
+                vals.forEach(function(v) {
+                    total += v['count'];
+                });
+                return {count: total};
+            },
+            query: { 'accessControl._id':mongoose.Types.ObjectId(siteId), '_id': {$gte: startDate,$lt: endDate}}
+        };
+        Access.mapReduce(o, function(err, results){
+            console.log(err);
+            res.send(results);
         });
     });
 
