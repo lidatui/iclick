@@ -48,7 +48,7 @@ block body
                 label(for="mapSite",style="margin-right:5px;margin-left:15px;") 站点：
                 select#mapSite
                     for site in sites
-                        option(value="#{site._id}") #{site.companyName}-#{site.siteName}-#{site.host}
+                        option(value="#{site._id}") #{site.companyName}-#{site.siteName}
 
                 button#mapSubmit.btn.btn-small.btn-primary(type="button",style="margin-left:10px;") 查询
             div#map_canvas.maps
@@ -62,7 +62,7 @@ block body
                 select#cpySite
                     option(value="") 全部
                     for site in sites
-                        option(value="#{site._id}") #{site.companyName}-#{site.siteName}-#{site.host}
+                        option(value="#{site._id}") #{site.companyName}-#{site.siteName}
 
                 button#cpySubmit.btn.btn-small.btn-primary(type="button",style="margin-left:10px;") 查询
             table.table.table-bordered.table-striped

@@ -9,7 +9,7 @@ module.exports = function(app){
 
 
         res.render('login', {
-            title : '登陆'
+            title : '投资一点通-登陆'
             ,description: 'login Description'
             ,author: 'miemiedev'
         });

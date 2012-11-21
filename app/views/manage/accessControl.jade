@@ -19,8 +19,11 @@ block body
                                 th(style="text-align: center;") #行号
                                 th(style="text-align: left;") 公司名称
                                 th(style="text-align: left;") 站点名称
+                                th(style="text-align: left;") 联系人
+                                th(style="text-align: left;") 联系电话
+                                th(style="text-align: left;") 电子邮件
                                 th(style="text-align: left;") 设置模版
-                                th(style="text-align: center;") 页面代码
+                                th(style="text-align: center;") 页面嵌入代码
                         tbody#siteBody
                             tr
                                 td(colspan="6",style="text-align: center;") 正在加载...
@@ -46,10 +49,20 @@ block body
                                         input#siteName(type="text",placeholder="例: 融易网")
                                         span.help-inline.hide 站点名称不得为空.
                                 div.control-group
-                                    label.control-label(for="siteHost") 站点域名(可选)
+                                    label.control-label(for="siteContact") 联系人(可选)
                                     div.controls
-                                        input#siteHost(type="text",placeholder="例: 95538.cn")
-                                        span.help-inline.hide 站点域名不能为空.
+                                        input#siteContact(type="text",placeholder="")
+                                        span.help-inline.hide 联系人不能为空.
+                                div.control-group
+                                    label.control-label(for="siteTel") 联系电话(可选)
+                                    div.controls
+                                        input#siteTel(type="text",placeholder="")
+                                        span.help-inline.hide 联系电话不能为空.
+                                div.control-group
+                                    label.control-label(for="siteEmail") 电子邮件(可选)
+                                    div.controls
+                                        input#siteEmail(type="text",placeholder="")
+                                        span.help-inline.hide 电子邮件不能为空.
                                 div.control-group
                                     label.control-label(for="siteTemplate") 设置模版
                                     div.controls
@@ -146,7 +159,10 @@ block script
                 var item = $.data(tr,'item');
                 $('#siteCompanyName').val(item.companyName);
                 $('#siteName').val(item.siteName);
-                $('#siteHost').val(item.host);
+                //$('#siteHost').val(item.host);
+                $('#siteContact').val(item.contact);
+                $('#siteTel').val(item.tel);
+                $('#siteEmail').val(item.email);
                 $('#siteTemplate').val(item.template).change();
 
                 $('#siteModal').data('item',item);
@@ -159,7 +175,10 @@ block script
                 param = $.extend(param,$('#siteModal').data('item'));
                 var companyName = $('#siteCompanyName').val();
                 var siteName = $('#siteName').val();
-                var host = $('#siteHost').val();
+                var host = '';//$('#siteHost').val();
+                var contact = $('#siteContact').val();
+                var tel = $('#siteTel').val();
+                var email = $('#siteEmail').val();
                 var item = $('#siteTemplate option:selected').data('item');
 
                 if(!companyName || !siteName || !item){
@@ -181,6 +200,9 @@ block script
                     companyName: companyName,
                     siteName: siteName,
                     host: host,
+                    contact: contact,
+                    tel: tel,
+                    email: email,
                     template: item._id
                 });
                 $.ajax({
@@ -243,9 +265,15 @@ block script
             $('#siteName').parent().parent().removeClass('error');
             $('#siteName').next().hide();
             $('#siteName').val('');
-            $('#siteHost').parent().parent().removeClass('error');
-            $('#siteHost').next().hide();
-            $('#siteHost').val('');
+            $('#siteContact').parent().parent().removeClass('error');
+            $('#siteContact').next().hide();
+            $('#siteContact').val('');
+            $('#siteTel').parent().parent().removeClass('error');
+            $('#siteTel').next().hide();
+            $('#siteTel').val('');
+            $('#siteEmail').parent().parent().removeClass('error');
+            $('#siteEmail').next().hide();
+            $('#siteEmail').val('');
             $('#siteTemplate').parent().parent().removeClass('error');
             $('#siteTemplate').next().hide();
             $('#siteTemplate').val('').change();
@@ -295,6 +323,19 @@ block script
                     trHtmls.push('</td>');
                     trHtmls.push('<td>');
                     trHtmls.push(item.siteName);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push(item.contact);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push(item.tel);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td>');
+                    trHtmls.push('<a style="color: #08C;" href="mailto:');
+                    trHtmls.push(item.email);
+                    trHtmls.push('?投资一点通网站嵌入代码" >');
+                    trHtmls.push(item.email);
+                    trHtmls.push('</a>');
                     trHtmls.push('</td>');
                     trHtmls.push('<td>');
                     trHtmls.push(item.templateName);

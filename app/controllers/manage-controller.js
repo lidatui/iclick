@@ -79,7 +79,7 @@ module.exports = function(app){
 
     app.get('/manage/article', restrict, article, function(req, res){
         res.render('manage/article', {
-            title : '内容管理'
+            title : '投资一点通-内容管理'
             ,description: 'article Description'
             ,author: 'miemiedev'
             ,l1: false,l2: true,l3: false,l4: false,l5: false,l6: false
@@ -135,7 +135,7 @@ module.exports = function(app){
 
     app.get('/manage/template', restrict, template, function(req, res){
         res.render('manage/template', {
-            title : '模版'
+            title : '投资一点通-模版'
             ,description: 'template Description'
             ,author: 'miemiedev'
             ,l1: false,l2: false,l3: false,l4: true,l5: false,l6: false
@@ -190,7 +190,7 @@ module.exports = function(app){
 
     app.get('/manage/accessControl', restrict, accessControl, function(req, res){
         res.render('manage/accessControl', {
-            title : '访问控制'
+            title : '投资一点通-生成链接'
             ,description: 'accessControl Description'
             ,author: 'miemiedev'
             ,l1: false,l2: false,l3: true,l4: false,l5: false,l6: false
@@ -253,7 +253,7 @@ module.exports = function(app){
 
         AccessControl.find({}).sort('companyName').exec(function (err, acs) {
             res.render('manage/statistics', {
-                title : '访问统计'
+                title : '投资一点通-访问统计'
                 ,description: 'statistics Description'
                 ,author: 'miemiedev'
                 ,l1: true,l2: false,l3: false,l4: false,l5: false,l6: false
@@ -473,7 +473,7 @@ module.exports = function(app){
 
     app.get('/manage/user', restrict, user, function(req, res){
         res.render('manage/user', {
-            title : '访问统计'
+            title : '投资一点通-用户管理'
             ,description: 'user Description'
             ,author: 'miemiedev'
             ,l1: false,l2: false,l3: false,l4: false,l5: true,l6: false
@@ -522,7 +522,7 @@ module.exports = function(app){
 
     app.get('/manage/access',restrict,access, function(req, res){
         res.render('manage/access', {
-            title : '访问记录'
+            title : '投资一点通-访问记录'
             ,description: 'access Description'
             ,author: 'miemiedev'
             ,l1: false,l2: false,l3: false,l4: false,l5: false,l6: true
