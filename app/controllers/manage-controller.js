@@ -383,7 +383,7 @@ module.exports = function(app){
                 var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
                 var day = d.getFullYear()+'-'+ month +'-'+ date;
                 emit({
-                    day:day, host: this.accessControl.host
+                    day:day,acId: this.accessControl._id
                 },{count: 1});
             },
             reduce: function(k, vals){
@@ -413,10 +413,10 @@ module.exports = function(app){
                         var items = [];
                         for(var i=0; i<acs.length; i++){
                             for(var j=0; j<results.length; j++){
-                                if(results[j]._id['host'] == acs[i].host){
+                                if(results[j]._id['acId'].toString() == acs[i]._id.toString()){
                                     var item = {
+                                        acId: acs[i]._id,
                                         day: results[j]._id['day'],
-                                        host: acs[i].host,
                                         companyName: acs[i].companyName,
                                         count: results[j].value.count
                                     }

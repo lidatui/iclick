@@ -72,11 +72,11 @@ block body
                         th(style="text-align: center;") #行号
                         th(style="text-align: center;") 时间
                         th(style="text-align: center;") 公司名
-                        th(style="text-align: center;") 域名
                         th(style="text-align: right;") 访问量(PV)
+                        th(style="text-align: center;") 查看页面
                 tbody#companyBody
                     tr
-                        td(colspan="4",style="text-align: center;") 正在加载...
+                        td(colspan="5",style="text-align: center;") 正在加载...
             div.pagination.pagination-right
                 ul#companyPaginator
                     li
@@ -323,11 +323,13 @@ block script
                     trHtmls.push('<td style="text-align: center;">');
                     trHtmls.push(item.companyName);
                     trHtmls.push('</td>');
-                    trHtmls.push('<td style="text-align: center;">');
-                    trHtmls.push(item.host);
-                    trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: right;">');
                     trHtmls.push(item.count);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="width: 100px;text-align: center;">');
+                    trHtmls.push('<button type="button" data-site-id="');
+                    trHtmls.push(item.acId);
+                    trHtmls.push('" class="btn btn-small btn-info">页面列表</button>');
                     trHtmls.push('</td>');
                     trHtmls.push('</tr>');
                 });

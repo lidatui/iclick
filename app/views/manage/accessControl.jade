@@ -68,6 +68,7 @@ block body
                     button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
                     h3#siteCodeLabel 站点代码
                 div.modal-body
+                    p 请将以下代码嵌入到您的网站首页：
                     pre &lt;script src="http://iclick.cloudfoundry.com/js/abceffgh.js"&gt;&lt;/script&gt;
                         br
                         |&lt;script id="iclick-renderer" data-site-id="
@@ -76,10 +77,42 @@ block body
                         br
                         |&lt;script&gt;
                         br
-                        |_iclick.show('response','小明,32,男','http://www.95538.cn');
+                        |_iclick.show(
+                        span(style="color:#D14") @elementid
+                        |,
+                        span(style="color:#D14")@userinfo
+                        |,
+                        span(style="color:#D14")@loginurl
+                        |);
                         br
                         |&lt;/script&gt;
-
+                    p 其中需要提供两个参数：
+                        br
+                        code @elementid
+                        |为包含一点通显示内容的标签id，标签的位置决定一点通显示的位置
+                        br
+                        code @userinfo
+                        |为用户信息，请按照'姓名,年龄,性别'的格式，将客户信息传入
+                        br
+                        code @loginurl
+                        |为网站的登录页面地址，当需要获取用户信息，而@userinfo参数没有提供有效数据的时候，将会打开本url指定的页面。
+                        br
+                        br
+                        |示例如下：
+                        br
+                        |_iclick.show('response','小明,32,男','http://www.95538.cn');
+                        br
+                        |或
+                        br
+                        |_iclick.show('response','','http://www.95538.cn');
+                        br
+                        |或
+                        br
+                        |_iclick.show('response','小明,32,男','');
+                        br
+                        |或
+                        br
+                        |_iclick.show('response','','');
 
                 div.modal-footer
                     button.btn(data-dismiss="modal",aria-hidden="true") 关闭
