@@ -70,7 +70,8 @@ block body
                     tr
                         th(style="text-align: center;") #行号
                         th(style="text-align: center;") 时间
-                        th(style="text-align: center;") 公司名
+                        th(style="text-align: center;") 公司名称
+                        th(style="text-align: center;") 站点名称
                         th(style="text-align: right;") 访问量(PV)
                         th(style="text-align: center;") 页面访问明细
                 tbody#companyBody
@@ -335,6 +336,9 @@ block script
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
                     trHtmls.push(item.companyName);
+                    trHtmls.push('</td>');
+                    trHtmls.push('<td style="text-align: center;">');
+                    trHtmls.push(item.siteName);
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: right;">');
                     trHtmls.push(item.count);

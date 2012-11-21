@@ -410,13 +410,14 @@ module.exports = function(app){
                 .exec(function (err, results) {
                     AccessControl.find({},function(err, acs){
                         var items = [];
-                        for(var i=0; i<acs.length; i++){
-                            for(var j=0; j<results.length; j++){
+                        for(var j=0; j<results.length; j++){
+                            for(var i=0; i<acs.length; i++){
                                 if(results[j]._id['acId'].toString() == acs[i]._id.toString()){
                                     var item = {
                                         acId: acs[i]._id,
                                         day: results[j]._id['day'],
                                         companyName: acs[i].companyName,
+                                        siteName: acs[i].siteName,
                                         count: results[j].value.count
                                     }
                                     items.push(item);
