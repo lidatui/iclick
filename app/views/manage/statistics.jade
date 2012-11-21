@@ -38,7 +38,6 @@ block body
             include ../includes/login
     div.main
         section
-            p 描述
             div#dayChart.chart
         section(style='display:none;')
             form.form-inline
@@ -73,7 +72,7 @@ block body
                         th(style="text-align: center;") 时间
                         th(style="text-align: center;") 公司名
                         th(style="text-align: right;") 访问量(PV)
-                        th(style="text-align: center;") 查看页面
+                        th(style="text-align: center;") 页面访问明细
                 tbody#companyBody
                     tr
                         td(colspan="5",style="text-align: center;") 正在加载...
@@ -98,7 +97,7 @@ block body
             div#pageListModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="pageListLabel",aria-hidden="true")
                 div.modal-header
                     button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
-                    h3#pageListLabel 页面列表
+                    h3#pageListLabel 页面访问列表
                 div.modal-body
                     p 以下为
                         span#pageCompany(style="font-weight:bold;margin: 0 2px 0 4px;")
@@ -112,7 +111,7 @@ block body
 
 block script
     script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBrDF1WpWGJlzMyNUs4rOZ-Lgz3nNYb6PQ&sensor=true')
-    script(src='http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerwithlabel/1.1.7/src/markerwithlabel_packed.js')
+    script(src='/js/markerwithlabel_packed.js')
     script(src='/js/highcharts/highcharts.js')
     script(src='/bootstrap/js/bootstrap-datepicker.js')
     script(src='/bootstrap/js/bootstrap-datepicker.zh-CN.js')
@@ -347,7 +346,7 @@ block script
                     trHtmls.push(item.day);
                     trHtmls.push('" data-company-name="');
                     trHtmls.push(item.companyName);
-                    trHtmls.push('" class="btn btn-small btn-info">页面列表</button>');
+                    trHtmls.push('" class="btn btn-small btn-info">查看</button>');
                     trHtmls.push('</td>');
                     trHtmls.push('</tr>');
                 });
