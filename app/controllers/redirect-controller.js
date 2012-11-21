@@ -16,7 +16,7 @@ module.exports = function(app){
                 if(req.query['r']){
                     res.redirect(req.query['r']);
                 }else{
-                    res.redirect('/error.html');
+                    res.redirect(article.targetUrl);
                 }
                 return ;
             }
