@@ -266,44 +266,50 @@ module.exports = function(app){
     });
 
     app.get('/manage/statistics/dayCount', function(req, res){
-        var o = {};
-        o.map = function () {
-            var d = this._id.getTimestamp();
-            var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
-            var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-            var result = d.getFullYear()+'-'+ month +'-'+ date;
-            emit(result, 1);
-        }
-        o.reduce = function (k, vals) {
-            var total = 0;
-            for ( var i=0; i<vals.length; i++ )
-                total += vals[i];
-            return total;
-        }
-        o.out = 'dayCount';
-        o.verbose = true;
-        Access.mapReduce(o, function (err, model, stats) {
-            model.count().exec(function (err, count) {
-                count = count < 10 ? 10 : count;
-                model.find({})
-                    .limit(10)
-                    .skip(count - 10)
-                    .sort('_id')
-                    .exec(function (err, results) {
-                        var date = [];
-                        var data = [];
-                        for(var i=0; i< results.length; i++){
-                            date.push(results[i]._id);
-                            data.push(results[i].value);
-                        }
-                        res.send({
-                            categories: date
-                            , data: data
-                        });
-                    });
+        AccessControl.find({},function(err, acs){
+            var acIds = acs.map(function(ac){
+                return ac._id;
             });
+            var o = {};
+            o.map = function () {
+                var d = this._id.getTimestamp();
+                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
+                var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
+                var result = d.getFullYear()+'-'+ month +'-'+ date;
+                emit(result, 1);
+            }
+            o.reduce = function (k, vals) {
+                var total = 0;
+                for ( var i=0; i<vals.length; i++ )
+                    total += vals[i];
+                return total;
+            }
+            o.out = 'dayCount';
+            o.verbose = true;
+            o.query = { 'accessControl._id':{$in: acIds}};
+            Access.mapReduce(o, function (err, model, stats) {
+                model.count().exec(function (err, count) {
+                    count = count < 10 ? 10 : count;
+                    model.find({})
+                        .limit(10)
+                        .skip(count - 10)
+                        .sort('_id')
+                        .exec(function (err, results) {
+                            var date = [];
+                            var data = [];
+                            for(var i=0; i< results.length; i++){
+                                date.push(results[i]._id);
+                                data.push(results[i].value);
+                            }
+                            res.send({
+                                categories: date
+                                , data: data
+                            });
+                        });
+                });
 
-        })
+            });
+        });
     });
 
     app.get('/manage/statistics/gis', function(req, res){
@@ -402,13 +408,17 @@ module.exports = function(app){
             o.query = { '_id': {$gte: startDate,$lt: endDate}};
         }
         Access.mapReduce(o, function (err, model, stats){
-            model
-                .find({})
-                .limit(pageSize)
-                .skip(pageSize * pageNo)
-                .sort('-_id.day')
-                .exec(function (err, results) {
-                    AccessControl.find({},function(err, acs){
+            AccessControl.find({},function(err, acs){
+                var acIds = acs.map(function(ac){
+                   return ac._id;
+                });
+                model
+                    .find({'_id.acId': {$in: acIds}})
+                    .limit(pageSize)
+                    .skip(pageSize * pageNo)
+                    .sort('-_id.day')
+                    .exec(function (err, results) {
+
                         var items = [];
                         for(var j=0; j<results.length; j++){
                             for(var i=0; i<acs.length; i++){
@@ -424,7 +434,7 @@ module.exports = function(app){
                                 }
                             }
                         }
-                        model.find({},function(err, totals){
+                        model.find({'_id.acId': {$in: acIds}},function(err, totals){
                             var total = {
                                 count: 0,
                                 total: true
@@ -433,7 +443,7 @@ module.exports = function(app){
                                 total['count'] += totals[i].value.count
                             }
                             items.push(total);
-                            model.count().exec(function (err, count) {
+                            model.count({'_id.acId': {$in: acIds}}).exec(function (err, count) {
                                 res.send({
                                     items: items
                                     , pageNo: pageNo
@@ -442,9 +452,8 @@ module.exports = function(app){
                                 });
                             })
                         })
-
-                    });
-                })
+                    })
+            });
 
 
 

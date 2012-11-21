@@ -34,14 +34,19 @@ require('./db-connect');
 var models_path = __dirname + '/app/models'
     , model_files = fs.readdirSync(models_path)
 model_files.forEach(function (file) {
-    require(models_path+'/'+file)
+    if(file.lastIndexOf('.js') == file.length - 3){
+        require(models_path+'/'+file)
+    }
 })
 
 // controllers
 var controllers_path = __dirname + '/app/controllers'
     , controller_files = fs.readdirSync(controllers_path);
 controller_files.forEach(function (file) {
-    require(controllers_path+'/'+file)(app);
+    if(file.lastIndexOf('.js') == file.length - 3){
+        require(controllers_path+'/'+file)(app);
+    }
+
 })
 
 //defined very last
