@@ -424,14 +424,25 @@ module.exports = function(app){
                                 }
                             }
                         }
-                        model.count().exec(function (err, count) {
-                            res.send({
-                                items: items
-                                , pageNo: pageNo
-                                , pageSize: pageSize
-                                , totalCount: count
-                            });
+                        model.find({},function(err, totals){
+                            var total = {
+                                count: 0,
+                                total: true
+                            };
+                            for(var i=0; i<totals.length; i++){
+                                total['count'] += totals[i].value.count
+                            }
+                            items.push(total);
+                            model.count().exec(function (err, count) {
+                                res.send({
+                                    items: items
+                                    , pageNo: pageNo
+                                    , pageSize: pageSize
+                                    , totalCount: count
+                                });
+                            })
                         })
+
                     });
                 })
 
