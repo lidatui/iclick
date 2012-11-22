@@ -44,7 +44,6 @@ module.exports = function(app){
             ipAddress = req.connection.remoteAddress;
         }
         access.ip = ipAddress;
-        ipAddress='123.123.123.123';
         var ipNum = dot2num(ipAddress);
         IpInfo.findOne({startNum:{ $lte: ipNum},endNum:{$gte: ipNum}}, function(err, ipInfo){
             if(err) return next(err);
