@@ -44,7 +44,7 @@ module.exports = function(app){
             ipAddress = req.connection.remoteAddress;
         }
         access.ip = ipAddress;
-
+        ipAddress='123.123.123.123';
         var ipNum = dot2num(ipAddress);
         IpInfo.findOne({startNum:{ $lte: ipNum},endNum:{$gte: ipNum}}, function(err, ipInfo){
             if(err) return next(err);
@@ -59,7 +59,7 @@ module.exports = function(app){
                     method: 'POST'
                 };
                 http.request(options,function(reqLookup) {
-                    reqLookup.on('data', function (ipData) {
+                    bodyParser(reqLookup,function(ipData){
                         var ipResult = JSON.parse(ipData);
                         //console.log('ip lookup: %s',ipData);
                         if(ipResult.ret != -1){
@@ -74,7 +74,7 @@ module.exports = function(app){
                         }else{
                             next();
                         }
-                    });
+                    })
                 }).on('error', function(err) {
                     console.log('problem with request: ' + err.message);
                     next(err);
@@ -158,4 +158,14 @@ module.exports = function(app){
         }
         return host;
     }
+    function bodyParser(res, next) {
+        var b = '';
+        res.setEncoding('utf-8');
+        res.on('data', function(data) {
+            b += data;
+        });
+        res.on('end', function() {res
+            next(b);
+        });
+    };
 }

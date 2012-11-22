@@ -484,11 +484,18 @@ module.exports = function(app){
                 });
                 return {count: total};
             },
-            query: { 'accessControl._id':mongoose.Types.ObjectId(siteId), '_id': {$gte: startDate,$lt: endDate}}
+            query: { 'accessControl._id':mongoose.Types.ObjectId(siteId), '_id': {$gte: startDate,$lt: endDate}},
+            out: 'companyCount',
+            verbose: true
         };
-        Access.mapReduce(o, function(err, results){
-            console.log(err);
-            res.send(results);
+        Access.mapReduce(o, function(err, model, stats){
+            model
+                .find()
+                .sort('-value.count')
+                .limit(50)
+                .exec(function (err, results) {
+                    res.send(results);
+                });
         });
     });
 
@@ -597,8 +604,7 @@ module.exports = function(app){
                     method: 'POST'
                 };
                 http.request(options,function(res) {
-                    res.setEncoding('utf8');
-                    res.on('data', function (data) {
+                    bodyParser(res, function(data){
                         try{
                             var resultData = JSON.parse(data);
                             var gisInfo = null;
@@ -633,6 +639,17 @@ module.exports = function(app){
 
 
     }
+
+    function bodyParser(res, next) {
+        var b = '';
+        res.setEncoding('utf-8');
+        res.on('data', function(data) {
+            b += data;
+        });
+        res.on('end', function() {res
+            next(b);
+        });
+    };
 
     function objectIdWithTimestamp(timestamp)
     {
