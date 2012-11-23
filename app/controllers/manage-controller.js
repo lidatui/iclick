@@ -571,21 +571,46 @@ module.exports = function(app){
     app.get('/manage/access/list',restrict,access, function(req, res){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
+
+        var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()-9);
+        var endDate = new Date (startDate);
+        endDate.setDate ( endDate.getDate() + 10 );
+        var startId = objectIdWithTimestamp(startDate);
+        var endId = objectIdWithTimestamp(endDate);
+
         Access
-            .find({})
+            .find({'_id': {$gte: startId,$lt: endId}})
             .limit(pageSize)
             .skip(pageSize * pageNo)
             .sort('-_id')
             .exec(function (err, accesses) {
 
-                Access.count().exec(function (err, count) {
-                        res.send({
-                            items: accesses
-                            , pageNo: pageNo
-                            , totalCount: count
-                            , pageSize: pageSize
-                        });
-                    })
+                Access.count({'_id': {$gte: startId,$lt: endId}}).exec(function (err, count) {
+
+                    var results = accesses.map(function(access){
+                       return {
+                           id: access._id,
+                           ip: access.ip,
+                           country: access.ipInfo ? access.ipInfo.country : '',
+                           province: access.ipInfo ? access.ipInfo.province : '',
+                           city: access.ipInfo ? access.ipInfo.city : '',
+                           district: access.ipInfo ? access.ipInfo.district : '',
+                           isp: access.ipInfo ? access.ipInfo.isp : '',
+                           desc: access.ipInfo ? access.ipInfo.desc : '',
+                           url: access.pageInfo ? access.pageInfo.resource : '',
+                           siteName: access.accessControl ? access.accessControl.siteName : '',
+                           os: access.os,
+                           browser: access.browser
+                       } ;
+                    });
+
+                    res.send({
+                        items: results
+                        , pageNo: pageNo
+                        , totalCount: count
+                        , pageSize: pageSize
+                    });
+                })
 
             })
     });

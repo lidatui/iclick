@@ -10,7 +10,7 @@ block body
             include ../includes/login
     div.main
         section
-            p 描述
+            p 最近十天的访问记录
             div.row-fluid
                 div.span12
                     table.table.table-bordered.table-striped.table-condensed
@@ -82,52 +82,36 @@ block script
                     trHtmls.push(pageNo * pageSize +index+1);
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
-                    trHtmls.push(getItemCreateTime(item._id));
+                    trHtmls.push(getItemCreateTime(item.id));
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
                     trHtmls.push('<span title="');
-                    if(item.ipInfo){
-                        trHtmls.push(item.ipInfo.desc);
-                    }
+                    trHtmls.push(item.desc);
                     trHtmls.push('" >');
                     trHtmls.push(item.ip);
                     trHtmls.push('</span>');
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
-                    if(item.ipInfo){
-                        trHtmls.push(item.ipInfo.country);
-                    }
+                    trHtmls.push(item.country);
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
-                    if(item.ipInfo){
-                        trHtmls.push(item.ipInfo.province);
-                    }
+                    trHtmls.push(item.province);
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
-                    if(item.ipInfo){
-                        trHtmls.push(item.ipInfo.city);
-                    }
+                    trHtmls.push(item.city);
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
-                    if(item.ipInfo){
-                        trHtmls.push(item.ipInfo.district);
-                    }
+                    trHtmls.push(item.district);
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
-                    if(item.ipInfo){
-                        trHtmls.push(item.ipInfo.isp);
-                    }
+                    trHtmls.push(item.isp);
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
-                    trHtmls.push('<span title="');
-                    if(item.pageInfo){
-                        trHtmls.push(item.pageInfo.resource);
-                    }else{
-                        trHtmls.push(item.url);
-                    }
+                    trHtmls.push('<a target="_blank" style="color:#08C;"  href="');
+                    trHtmls.push(item.url);
                     trHtmls.push('" >');
-                    trHtmls.push(item.host);
-                    trHtmls.push('</span>');
+                    trHtmls.push(item.siteName);
+                    trHtmls.push('</a>');
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="text-align: center;">');
                     trHtmls.push(item.os);
