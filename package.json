@@ -15,7 +15,8 @@
         "handlebars":"*",
         "dateformat":"*",
         "useragent":"*",
-        "cron":"*"
+        "cron":"*",
+        "connect-mongodb":"*"
     },
     "devDependencies":{
         "vows":"0.5.x",
