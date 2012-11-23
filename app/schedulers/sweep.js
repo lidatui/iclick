@@ -4,11 +4,7 @@ module.exports = function(){
     var Access = mongoose.model('Access');
 
     new CronJob('0 0 0 * * *', function(){
-        var startDate = new Date();
-        startDate.setHours(0);
-        startDate.setMinutes(0);
-        startDate.setSeconds(0);
-        startDate.setMilliseconds(0);
+        var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
         startDate.setFullYear(startDate.getFullYear() - 1);
         var startId = objectIdWithTimestamp(startDate);
         //清理一年前的数据
