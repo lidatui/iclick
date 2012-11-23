@@ -4,31 +4,31 @@ nav.banner
         ul
             - if (session.user.role.statistics)
                 - if (l1)
-                    li: a.selected 访问统计
+                    li: a.selected(href='/manage/statistics') 访问统计
                 - else
                     li: a(href='/manage/statistics') 访问统计
             - if (session.user.role.article)
                 - if (l2)
-                    li: a.selected 内容管理
+                    li: a.selected(href='/manage/article') 内容管理
                 - else
                     li: a(href='/manage/article') 内容管理
             - if (session.user.role.accessControl)
                 - if (l3)
-                    li: a.selected 生成链接
+                    li: a.selected(href='/manage/accessControl') 生成链接
                 - else
                     li: a(href='/manage/accessControl') 生成链接
             - if (session.user.role.template)
                 - if (l4)
-                    li: a.selected 模版
+                    li: a.selected(href='/manage/template') 模版
                 - else
                     li: a(href='/manage/template') 模版
             - if (session.user.role.user)
                 - if (l5)
-                    li: a.selected 用户权限
+                    li: a.selected(href='/manage/user') 用户权限
                 - else
                     li: a(href='/manage/user') 用户权限
             - if (session.user.role.access)
                 - if (l6)
-                    li: a.selected 访问记录
+                    li: a.selected(href='/manage/access') 访问记录
                 - else
                     li: a(href='/manage/access') 访问记录

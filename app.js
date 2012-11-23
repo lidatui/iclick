@@ -72,3 +72,18 @@ io.sockets.on('connection', function(socket){
     });
 });
 
+var cronJob = require('cron').CronJob;
+
+var models_path = __dirname + '/app/schedulers'
+    , model_files = fs.readdirSync(models_path)
+var tasks = [];
+model_files.forEach(function (file) {
+    if(file.lastIndexOf('.js') == file.length - 3){
+        tasks.push(require(models_path+'/'+file))
+    }
+})
+new cronJob('*/2 * * * * *', function(){
+    tasks.forEach(function(task){
+        task();
+    });
+},null,true);

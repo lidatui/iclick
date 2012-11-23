@@ -1,6 +1,6 @@
 {
-    "name":"express-site-template",
-    "description":"express-site-template description",
+    "name":"iclick",
+    "description":"iclick description",
     "author":"miemiedev <miemiedev@gmail.com>",
     "version":"0.0.1",
     "private":true,
@@ -14,7 +14,8 @@
         "socket.io":"*",
         "handlebars":"*",
         "dateformat":"*",
-        "useragent":"*"
+        "useragent":"*",
+        "cron":"*"
     },
     "devDependencies":{
         "vows":"0.5.x",
