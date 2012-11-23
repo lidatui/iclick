@@ -93,6 +93,16 @@ if (cluster.isMaster) {
 
     //Setup Socket.IO
     var io = io.listen(server);
+    //CF
+    if(process.env.VMC_APP_PORT) {
+        io.set('transports', [
+            //'websocket',
+            'flashsocket',
+            'htmlfile',
+            'xhr-polling',
+            'jsonp-polling'
+        ]);
+    }
     io.sockets.on('connection', function(socket){
         console.log('Client Connected');
         socket.on('message', function(data){
