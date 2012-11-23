@@ -73,11 +73,11 @@ io.sockets.on('connection', function(socket){
 });
 
 
-
-var models_path = __dirname + '/app/schedulers'
-    , model_files = fs.readdirSync(models_path)
-model_files.forEach(function (file) {
+// schedulers
+var schedulers_path = __dirname + '/app/schedulers'
+    , scheduler_files = fs.readdirSync(schedulers_path)
+scheduler_files.forEach(function (file) {
     if(file.lastIndexOf('.js') == file.length - 3){
-        require(models_path+'/'+file)()
+        require(schedulers_path+'/'+file)()
     }
 })
