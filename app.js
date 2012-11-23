@@ -82,7 +82,7 @@ model_files.forEach(function (file) {
         tasks.push(require(models_path+'/'+file))
     }
 })
-new cronJob('*/2 * * * * *', function(){
+new cronJob('0 0 0 * * *', function(){
     tasks.forEach(function(task){
         task();
     });
