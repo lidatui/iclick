@@ -330,11 +330,11 @@ block script
             $ul.append($prev);
             /////
             var list = [1];
+            if(pageNo+1 > 4 ){
+                list.push('...');
+            }
             for(var i= 0; i < 5; i++){
-                var no = pageNo - 2 + i;
-                if(i==0 && no > 3){
-                    list.push('...');
-                }
+                var no = pageNo - 1 + i;
                 if(no > 1 && no <= totalPage-1){
                     list.push(no);
                 }
@@ -371,4 +371,10 @@ block script
             }
             $ul.append($next);
         }
+        var getLocation = function(href) {
+            var l = document.createElement("a");
+            l.href = href;
+            return l;
+        };
+
 

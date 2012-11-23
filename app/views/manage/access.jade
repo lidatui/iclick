@@ -10,7 +10,7 @@ block body
             include ../includes/login
     div.main
         section
-            p 最近十天的访问记录
+            p 最近一天的访问记录
             div.row-fluid
                 div.span12
                     table.table.table-bordered.table-striped.table-condensed
@@ -157,12 +157,13 @@ block script
             $ul.append($prev);
             /////
             var list = [1];
-            for(var i= 0; i < 5; i++){
-                var no = pageNo - 2 + i;
 
-                if(i==0 && no > 3){
-                    list.push('...');
-                }
+            if(pageNo+1 > 4 ){
+                list.push('...');
+            }
+
+            for(var i= 0; i < 5; i++){
+                var no = pageNo - 1 + i;
                 if(no > 1 && no <= totalPage-1){
                     list.push(no);
                 }

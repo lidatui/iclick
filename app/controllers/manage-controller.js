@@ -572,20 +572,17 @@ module.exports = function(app){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
 
-        var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()-9);
-        var endDate = new Date (startDate);
-        endDate.setDate ( endDate.getDate() + 10 );
+        var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
         var startId = objectIdWithTimestamp(startDate);
-        var endId = objectIdWithTimestamp(endDate);
 
         Access
-            .find({'_id': {$gte: startId,$lt: endId}})
+            .find({'_id': {$gte: startId}})
             .limit(pageSize)
             .skip(pageSize * pageNo)
             .sort('-_id')
             .exec(function (err, accesses) {
 
-                Access.count({'_id': {$gte: startId,$lt: endId}}).exec(function (err, count) {
+                Access.count({'_id': {$gte: startId}}).exec(function (err, count) {
 
                     var results = accesses.map(function(access){
                        return {
