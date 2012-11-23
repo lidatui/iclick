@@ -12,10 +12,10 @@ module.exports = function(){
         startDate.setFullYear(startDate.getFullYear() - 1);
         var startId = objectIdWithTimestamp(startDate);
         //清理一年前的数据
-        Access.remove({'_id': {$lt: startId}},function(err,results){
+        Access.remove({'_id': {$lt: startId}},function(err,count){
             if(err) return console.log('sweep lt %s data error!', startDate.toDateString());
 
-            console.log('Sweep lt %s data, count: %s !', startDate.toDateString(),results);
+            console.log('Sweep lt %s data, count: %s !', startDate.toDateString(),count);
         });
     },null,true);
 
