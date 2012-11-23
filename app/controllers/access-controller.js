@@ -125,6 +125,11 @@ module.exports = function(app){
                 }
             });
 
+        if(!app.qph){
+            app.qph = 1;
+            return;
+        }
+        app.qph++;
     });
 
     //IP转数字
