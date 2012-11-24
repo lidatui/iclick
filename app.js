@@ -49,7 +49,7 @@ var express = require('express')
         app.use(express.cookieParser('your secret here'));
         app.use(express.session({
             secret: 'iclicksession',
-            maxAge: new Date(Date.now() + 3600000),
+            maxAge: new Date(Date.now() + 1000 * 60 * 20),
             store: sessionStore
         }));
         app.use(express.static(path.join(__dirname, '/static')));

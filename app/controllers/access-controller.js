@@ -84,8 +84,7 @@ module.exports = function(app){
         //获得操作系统和浏览器
         var access = req.query['access'];
         var agent = useragent.parse(req.headers['user-agent']);
-        access.os = agent.os;
-        access.browser = agent.toAgent();
+        access.agent = agent;//'{"family":"Chrome","major":"15","minor":"0","patch":"874","os":"Mac OS X"}'
         next();
     },function(req, res, next){
         //存储

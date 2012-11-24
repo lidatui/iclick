@@ -629,8 +629,8 @@ module.exports = function(app){
                            desc: access.ipInfo ? access.ipInfo.desc : '',
                            url: access.pageInfo ? access.pageInfo.resource : '',
                            siteName: access.accessControl ? access.accessControl.siteName : '',
-                           os: access.os,
-                           browser: access.browser
+                           os: access.agent ? access.agent.os : access.os,
+                           browser: access.agent ? access.agent.family+' '+ access.agent.major+'.'+access.agent.minor+'.'+access.agent.patch : access.browser
                        } ;
                     });
 
