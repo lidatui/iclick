@@ -39,6 +39,14 @@ block body
     div.main
         section
             div#dayChart.chart
+        div#detailChartsModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="detailChartsLabel",aria-hidden="true",style="width:650px;")
+            div.modal-header
+                button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
+                h3#detailChartsLabel 流量组成
+            div.modal-body
+                div#pieChart
+            div.modal-footer
+                button.btn(data-dismiss="modal",aria-hidden="true") 关闭
         section(style='display:none;')
             form.form-inline
                 label(for="mapStartDate",style="margin-right:5px;") 时间：
@@ -108,6 +116,7 @@ block body
                         li 正在载入...
                 div.modal-footer
                     button.btn(data-dismiss="modal",aria-hidden="true") 关闭
+
 
 
 block script
@@ -186,14 +195,14 @@ block script
                 }
             });
 
-            var chart;
+
 
             $.ajax({
                 url: '/manage/statistics/dayCount',
                 dataType: 'json',
                 cache: false
             }).done(function(result){
-                chart = new Highcharts.Chart({
+                var chart = new Highcharts.Chart({
                     chart: {
                         renderTo: 'dayChart',
                         type: 'line'
@@ -237,6 +246,19 @@ block script
                                 enabled: true
                             },
                             enableMouseTracking: true
+                        },
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function() {
+                                        showPieChart(this.category);
+                                    }
+                                }
+                            },
+                            marker: {
+                                lineWidth: 1
+                            }
                         }
                     },
                     series: [{
@@ -252,6 +274,57 @@ block script
             loadCompany(0,20);
 
         });
+
+        function showPieChart(date){
+            $.ajax({
+                url: '/manage/statistics/daySiteCount',
+                dataType: 'json',
+                data:{
+                    date:date
+                },
+                cache: false
+            }).done(function(result){
+                var chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'pieChart',
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false
+                    },
+                    title: {
+                        text: date
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.y}次</b>',
+                        percentageDecimals: 1
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                color: '#000000',
+                                connectorColor: '#000000',
+                                formatter: function() {
+                                    return '<b>'+ this.point.name +'</b>: '+ this.percentage.toFixed(1) +' %';
+                                }
+                            }
+                        }
+                    },
+                    series: [{
+                        type: 'pie',
+                        name: '访问次数',
+                        data: result.data
+                    }],
+                    credits: {
+                        enabled: false
+                    }
+                });
+            });
+
+            $('#detailChartsModal').modal('show');
+        }
 
 
         function addMarker(item) {

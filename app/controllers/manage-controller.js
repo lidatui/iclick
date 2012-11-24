@@ -172,7 +172,7 @@ module.exports = function(app){
                     tpls = tpls.map(function (tpl) {
                         var item = tpl.toObject();
                         var path = __dirname.substr(0,__dirname.length-15) + 'static/tpl/'+item.path;
-                        console.log(path);
+
                         var tplContent = fs.readFileSync(path,'utf-8');
                         var template = handlebars.compile(tplContent);
                         item.preView = template(article);
@@ -306,6 +306,43 @@ module.exports = function(app){
                 });
             });
         });
+    });
+
+    app.get('/manage/statistics/daySiteCount', function(req, res){
+        var startDate = new Date(req.query["date"]);
+        var endDate = new Date (startDate);
+        endDate.setDate ( endDate.getDate() + 1 );
+        startDate = objectIdWithTimestamp(startDate);
+        endDate = objectIdWithTimestamp(endDate);
+        AccessControl.find({},function(err, acs){
+            var acIds = acs.map(function(ac){
+                return ac._id;
+            });
+            var o = {
+                map: function(){
+                    if(this.accessControl){
+                        emit(this.accessControl.siteName,1);
+                    }
+                },
+                reduce: function(k, vals){
+                    var total = 0;
+                    for ( var i=0; i<vals.length; i++ )
+                        total += vals[i];
+                    return total;
+                },
+                query: {'accessControl._id':{$in: acIds}, '_id': {$gte: startDate,$lt: endDate}}
+            };
+            Access.mapReduce(o, function (err, results) {
+                var data = [];
+                for(var i=0; i< results.length; i++){
+                    data.push([results[i]._id, results[i].value]);
+                }
+                res.send({
+                    data: data
+                });
+            });
+        });
+
     });
 
     app.get('/manage/statistics/gis', function(req, res){
