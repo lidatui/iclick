@@ -10,31 +10,31 @@ var express = require('express')
   , path = require('path');
 
 
-var cluster = require('cluster');
-var numCPUs = require('os').cpus().length;
-
-if (cluster.isMaster) {
-    // Fork workers.
-    var fPid;
-    for (var i = 0; i < numCPUs; i++) {
-        var worker = cluster.fork();
-        if(i===0){
-            worker.send('I am first!');
-            fPid = worker.process.pid;
-        }
-    }
-
-    cluster.on('exit', function(worker, code, signal) {
-        var exitCode = worker.process.exitCode;
-        console.log('worker ' + worker.process.pid + ' died ('+exitCode+'). restarting...');
-
-        var newWorker = cluster.fork();
-        if(fPid === worker.process.pid){
-            newWorker.send('I am alive again!');
-            fPid = newWorker.process.pid;
-        }
-    });
-} else if (cluster.isWorker){
+//var cluster = require('cluster');
+//var numCPUs = require('os').cpus().length;
+//
+//if (cluster.isMaster) {
+//    // Fork workers.
+//    var fPid;
+//    for (var i = 0; i < numCPUs; i++) {
+//        var worker = cluster.fork();
+//        if(i===0){
+//            worker.send('I am first!');
+//            fPid = worker.process.pid;
+//        }
+//    }
+//
+//    cluster.on('exit', function(worker, code, signal) {
+//        var exitCode = worker.process.exitCode;
+//        console.log('worker ' + worker.process.pid + ' died ('+exitCode+'). restarting...');
+//
+//        var newWorker = cluster.fork();
+//        if(fPid === worker.process.pid){
+//            newWorker.send('I am alive again!');
+//            fPid = newWorker.process.pid;
+//        }
+//    });
+//} else if (cluster.isWorker){
     var app = express();
     var sessionStore = require('./db-session');
 
@@ -43,7 +43,7 @@ if (cluster.isMaster) {
         app.set('views', __dirname + '/app/views');
         app.set('view engine', 'jade');
         app.use(express.favicon());
-        app.use(express.logger('dev'));
+        //app.use(express.logger('dev'));
         app.use(express.bodyParser());
         app.use(express.methodOverride());
         app.use(express.cookieParser('your secret here'));
@@ -121,7 +121,7 @@ if (cluster.isMaster) {
         socket.emit('qph', { count: qph});
     });
 
-    process.on('message', function(msg) {
+    //process.on('message', function(msg) {
         // schedulers
         var schedulers_path = __dirname + '/app/schedulers'
             , scheduler_files = fs.readdirSync(schedulers_path)
@@ -131,8 +131,8 @@ if (cluster.isMaster) {
             }
         })
         console.log('Scheduler started...');
-    });
+    //});
 
 
-}
+//}
 

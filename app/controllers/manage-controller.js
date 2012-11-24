@@ -266,6 +266,13 @@ module.exports = function(app){
     });
 
     app.get('/manage/statistics/dayCount', function(req, res){
+        var startDate = new Date();
+        startDate.setMonth(startDate.getMonth() -1);
+        var endDate = new Date ();
+        endDate.setDate ( endDate.getDate() + 1 );
+        startDate = objectIdWithTimestamp(startDate);
+        endDate = objectIdWithTimestamp(endDate);
+
         AccessControl.find({},function(err, acs){
             var acIds = acs.map(function(ac){
                 return ac._id;
@@ -284,30 +291,19 @@ module.exports = function(app){
                     total += vals[i];
                 return total;
             }
-            o.out = 'dayCount';
-            o.verbose = true;
-            o.query = { 'accessControl._id':{$in: acIds}};
-            Access.mapReduce(o, function (err, model, stats) {
-                model.count().exec(function (err, count) {
-                    count = count < 10 ? 10 : count;
-                    model.find({})
-                        .limit(10)
-                        .skip(count - 10)
-                        .sort('_id')
-                        .exec(function (err, results) {
-                            var date = [];
-                            var data = [];
-                            for(var i=0; i< results.length; i++){
-                                date.push(results[i]._id);
-                                data.push(results[i].value);
-                            }
-                            res.send({
-                                categories: date
-                                , data: data
-                            });
-                        });
+            o.query = { 'accessControl._id':{$in: acIds},'_id': {$gte: startDate,$lt: endDate}};
+            Access.mapReduce(o, function (err, results) {
+                var date = [];
+                var data = [];
+                for(var i=0; i< results.length; i++){
+                    date.push(results[i]._id);
+                    data.push(results[i].value);
+                }
+                res.send({
+                    categories: date
+                    , data: data
+                    , step: date / 8
                 });
-
             });
         });
     });
