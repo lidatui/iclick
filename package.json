@@ -16,7 +16,8 @@
         "dateformat":"*",
         "useragent":"*",
         "cron":"*",
-        "connect-mongodb":"*"
+        "connect-mongodb":"*",
+        "socket.io-clusterhub":"*"
     },
     "devDependencies":{
         "vows":"0.5.x",
