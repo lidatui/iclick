@@ -196,13 +196,15 @@ block script
                 chart = new Highcharts.Chart({
                     chart: {
                         renderTo: 'dayChart',
-                        type: 'area'
+                        type: 'line'
                     },
                     title: {
                         text: '每日流量统计',
+                        x: -20 //center
                     },
                     subtitle: {
-                        text: '最近一个月的访问计数'
+                        text: '最近一个月的访问计数',
+                        x: -20
                     },
                     xAxis: {
                         categories: result.categories,
@@ -216,7 +218,12 @@ block script
                     yAxis: {
                         title: {
                             text: '访问量(PV)'
-                        }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
                     },
                     tooltip: {
                         formatter: function() {
