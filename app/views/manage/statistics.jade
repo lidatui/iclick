@@ -42,7 +42,7 @@ block body
         div#detailChartsModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="detailChartsLabel",aria-hidden="true",style="width:650px;")
             div.modal-header
                 button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
-                h3#detailChartsLabel 流量组成
+                h3#detailChartsLabel 流量统计
             div.modal-body
                 div#pieChart
             div.modal-footer
@@ -276,6 +276,8 @@ block script
         });
 
         function showPieChart(date){
+            $('#pieChart').empty();
+            $('#detailChartsLabel').text(date+'流量统计');
             $.ajax({
                 url: '/manage/statistics/daySiteCount',
                 dataType: 'json',
@@ -292,7 +294,7 @@ block script
                         plotShadow: false
                     },
                     title: {
-                        text: date
+                        text: '流量组成'
                     },
                     tooltip: {
                         pointFormat: '{series.name}: <b>{point.y}次</b>',
