@@ -6,6 +6,14 @@ block style
             min-width: 400px;
             height: 400px;
             margin: 0 auto ;
+            position: relative;
+        }
+        .loading{
+            font-size: 40px;
+            position: absolute;
+            top: 100px;
+            left: 300px;
+            color: #c0c0c0;
         }
 
 block body
@@ -22,6 +30,7 @@ block body
     div.main
         section
             div#dayChart.chart
+                span.loading 正在载入，请稍后...
         div#detailChartsModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="detailChartsLabel",aria-hidden="true",style="width:650px;")
             div.modal-header
                 button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
