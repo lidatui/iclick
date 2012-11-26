@@ -1,7 +1,7 @@
 
-var DayCountSchema = new Schema({
+var HourCountSchema = new Schema({
     acId: {type: Schema.ObjectId, ref: 'AccessControl'},
     time: {type: String, default: '', trim: true},
     count: {type: Number, default: 0}
 });
-mongoose.model('DayCount', DayCountSchema);
+mongoose.model('HourCount', HourCountSchema);

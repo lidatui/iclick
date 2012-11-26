@@ -3,22 +3,23 @@ module.exports = function(){
     var CronJob = require('cron').CronJob;
     var Access = mongoose.model('Access');
     var AccessControl = mongoose.model('AccessControl');
-    var DayCount = mongoose.model('DayCount');
-    console.log('DayCount scheduler loaded...');
-    new CronJob('0 0 0 * * *', function(){
-        console.log('DayCount scheduler start...');
-        var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
-        startDate.setDate(startDate.getDate() - 1);
-        var startId = objectIdWithTimestamp(startDate);
-        var endDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
-        var endId = objectIdWithTimestamp(endDate);
+    var HourCount = mongoose.model('HourCount');
+    console.log('HourCount scheduler loaded...');
+    new CronJob('0 * * * * *', function(){
+        console.log('HourCount scheduler start...');
+        var startTime = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours(),0,0);
+        startTime.setHours(startTime.getHours() - 1);
+        var endTime = new Date(startTime);
+        var startId = objectIdWithTimestamp(startTime);
+        var endId = objectIdWithTimestamp(endTime);
 
         var o = {
             map: function(){
                 var d = this._id.getTimestamp();
                 var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
                 var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-                var time = d.getFullYear()+'-'+ month +'-'+ date;
+                var hour = d.getHours() < 10 ? '0'+ d.getHours(): d.getHours();
+                var time = d.getFullYear()+'-'+ month +'-'+ date + ' ' +hour+':00:00';
                 emit({
                     time:time,acId: this.accessControl._id
                 },{count: 1});
@@ -31,7 +32,7 @@ module.exports = function(){
                 return {count: total};
             },
             query: { '_id': {$gte: startId,$lt: endId}},
-            out: 'dayCount',
+            out: 'hourCount',
             verbose: true
         };
 
@@ -45,14 +46,14 @@ module.exports = function(){
 
                         for(var j=0; j<results.length; j++){
 
-                            var dayCount = new DayCount({
+                            var hourCount = new HourCount({
                                 acId: results[j]._id['acId'],
                                 time: results[j]._id['time'],
                                 count: results[j].value.count
                             });
-                            dayCount.save();
+                            hourCount.save();
                         }
-                        console.log('DayCount scheduler done...%s',formatDate(startDate));
+                        console.log('HourCount scheduler done...%s',formatDate(startTime));
 
                     })
             });
@@ -71,6 +72,7 @@ module.exports = function(){
     function formatDate(d){
         var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
         var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-        return d.getFullYear()+'-'+ month +'-'+ date;
+        var hour = d.getHours() < 10 ? '0'+ d.getHours(): d.getHours();
+        return d.getFullYear()+'-'+ month +'-'+ date + ' ' +hour+':00:00';
     }
 }
