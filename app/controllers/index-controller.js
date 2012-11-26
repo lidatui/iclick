@@ -3,9 +3,9 @@ module.exports = function(app){
     var User = mongoose.model('User');
 
     app.get('/', function(req, res){
-        res.redirect('/login');
+        res.redirect('/manage/login');
     });
-    app.get('/login', function(req, res){
+    app.get('/manage/login', function(req, res){
 
 
         res.render('login', {
@@ -14,7 +14,7 @@ module.exports = function(app){
             ,author: 'miemiedev'
         });
     });
-    app.post('/login', function(req, res,next){
+    app.post('/manage/login', function(req, res,next){
         User.findOne({loginName: req.body.loginName, loginPwd: req.body.loginPwd}, function(err, user){
             if(user){
                 req.session.error = '';
@@ -52,7 +52,7 @@ module.exports = function(app){
 
     });
 
-    app.get('/logout', function(req, res){
+    app.get('/manage/logout', function(req, res){
         req.session.destroy(function(){
             res.redirect('/');
         });

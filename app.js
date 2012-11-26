@@ -50,7 +50,7 @@ var socketiostore = new (require('socket.io-clusterhub'));
         app.use(express.cookieParser('your secret here'));
         app.use(express.session({
             secret: 'iclicksession',
-            maxAge: new Date(Date.now() + 1000 * 60 * 20),
+            cookie: { path: '/manage', httpOnly: true,  maxAge: 1000 * 60 * 60},
             store: sessionStore
         }));
         app.use(express.static(path.join(__dirname, '/static')));

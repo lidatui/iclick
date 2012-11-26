@@ -17,7 +17,7 @@ module.exports = function(app){
             next();
         } else {
             req.session.error = '您的登陆状态已过期，请重新登录!';
-            res.redirect('/login');
+            res.redirect('/manage/login');
         }
     }
 
@@ -26,7 +26,7 @@ module.exports = function(app){
             next();
         } else {
             req.session.error = '无此权限!';
-            res.redirect('/login');
+            res.redirect('/manage/login');
         }
     }
 
@@ -35,7 +35,7 @@ module.exports = function(app){
             next();
         } else {
             req.session.error = '无此权限!';
-            res.redirect('/login');
+            res.redirect('/manage/login');
         }
     }
 
@@ -44,7 +44,7 @@ module.exports = function(app){
             next();
         } else {
             req.session.error = '无此权限!';
-            res.redirect('/login');
+            res.redirect('/manage/login');
         }
     }
 
@@ -53,7 +53,7 @@ module.exports = function(app){
             next();
         } else {
             req.session.error = '无此权限!';
-            res.redirect('/login');
+            res.redirect('/manage/login');
         }
     }
 
@@ -62,7 +62,7 @@ module.exports = function(app){
             next();
         } else {
             req.session.error = '无此权限!';
-            res.redirect('/login');
+            res.redirect('/manage/login');
         }
     }
 
@@ -71,7 +71,7 @@ module.exports = function(app){
             next();
         } else {
             req.session.error = '无此权限!';
-            res.redirect('/login');
+            res.redirect('/manage/login');
         }
     }
 
