@@ -14,28 +14,28 @@ var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 var socketiostore = new (require('socket.io-clusterhub'));
 
-if (cluster.isMaster) {
-    // Fork workers.
-    var fPid;
-    for (var i = 0; i < numCPUs; i++) {
-        var worker = cluster.fork();
-        if(i===0){
-            worker.send('schedulerRun');
-            fPid = worker.process.pid;
-        }
-    }
-
-    cluster.on('exit', function(worker, code, signal) {
-        var exitCode = worker.process.exitCode;
-        console.log('worker ' + worker.process.pid + ' died ('+exitCode+'). restarting...');
-
-        var newWorker = cluster.fork();
-        if(fPid === worker.process.pid){
-            newWorker.send('schedulerRun');
-            fPid = newWorker.process.pid;
-        }
-    });
-} else if (cluster.isWorker){
+//if (cluster.isMaster) {
+//    // Fork workers.
+//    var fPid;
+//    for (var i = 0; i < numCPUs; i++) {
+//        var worker = cluster.fork();
+//        if(i===0){
+//            worker.send('schedulerRun');
+//            fPid = worker.process.pid;
+//        }
+//    }
+//
+//    cluster.on('exit', function(worker, code, signal) {
+//        var exitCode = worker.process.exitCode;
+//        console.log('worker ' + worker.process.pid + ' died ('+exitCode+'). restarting...');
+//
+//        var newWorker = cluster.fork();
+//        if(fPid === worker.process.pid){
+//            newWorker.send('schedulerRun');
+//            fPid = newWorker.process.pid;
+//        }
+//    });
+//} else if (cluster.isWorker){
     var app = express();
     var sessionStore = require('./db-session');
 
@@ -101,7 +101,7 @@ if (cluster.isMaster) {
     //CF
     if(process.env.VMC_APP_PORT) {
         io.set('transports', [
-            'websocket',
+//            'websocket',
             'flashsocket',
             'htmlfile',
             'xhr-polling',
@@ -112,8 +112,8 @@ if (cluster.isMaster) {
 
     var CronJob = require('cron').CronJob;
     var qph = 0;
-    new CronJob('*/5 * * * * *', function(){
-        qph = app.qph/5;
+    new CronJob('* * * * * *', function(){
+        qph = app.qph;
         io.sockets.emit('qph', { count: qph});
         app.qph = 0;
     },null,true);
@@ -122,8 +122,8 @@ if (cluster.isMaster) {
         socket.emit('qph', { count: qph});
     });
 
-    process.on('message', function(msg) {
-        if(msg === 'schedulerRun'){
+//    process.on('message', function(msg) {
+//        if(msg === 'schedulerRun'){
             // schedulers
             var schedulers_path = __dirname + '/app/schedulers'
                 , scheduler_files = fs.readdirSync(schedulers_path)
@@ -133,10 +133,10 @@ if (cluster.isMaster) {
                 }
             })
             console.log('Scheduler started...');
-        }
+//        }
 
-    });
+//    });
 
 
-}
+//}
 

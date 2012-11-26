@@ -4,9 +4,9 @@ nav.banner
         ul
             - if (session.user.role.statistics)
                 - if (l1)
-                    li: a.selected(href='/manage/statistics') 访问统计
+                    li: a.selected(href='/manage/countCharts') 访问统计
                 - else
-                    li: a(href='/manage/statistics') 访问统计
+                    li: a(href='/manage/countCharts') 访问统计
             - if (session.user.role.article)
                 - if (l2)
                     li: a.selected(href='/manage/article') 内容管理
