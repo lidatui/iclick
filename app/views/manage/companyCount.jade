@@ -2,28 +2,6 @@ extends ../layout
 block style
     link(rel='stylesheet', href='/bootstrap/css/datepicker.css')
     style
-        .chart{
-            min-width: 400px;
-            height: 400px;
-            margin: 0 auto ;
-        }
-
-        .maps{
-            min-width: 400px;
-            height: 600px;
-            margin: 0 auto ;
-            border: 1px solid #b8bcc0;
-            margin-bottom: 40px;
-        }
-        .labels {
-            color: black;
-            background-color: #fff;
-            font-weight: bold;
-            text-align: center;
-            width: 40px;
-            border: 1px solid #ccc;
-            margin-bottom: 40px;
-        }
 
 block body
     include ../includes/banner
@@ -32,35 +10,13 @@ block body
             div.header
                 h1 访问统计
                 ul.tabs
-                    li: a.selected 流量统计
-                    li: a 地址分布
-                    li: a 公司访问
+                    li: a(href="countCharts") 流量统计
+                    li: a(href="maps") 地址分布
+                    li: a.selected(href="companyCount") 公司访问
             include ../includes/login
     div.main
-        section
-            div#dayChart.chart
-        div#detailChartsModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="detailChartsLabel",aria-hidden="true",style="width:650px;")
-            div.modal-header
-                button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
-                h3#detailChartsLabel 流量统计
-            div.modal-body
-                div#pieChart
-            div.modal-footer
-                button.btn(data-dismiss="modal",aria-hidden="true") 关闭
-        section(style='display:none;')
-            form.form-inline
-                label(for="mapStartDate",style="margin-right:5px;") 时间：
-                input#mapStartDate.input-small(type="text")
-                label(for="mapEndDate",style="margin-right:5px;margin-left:5px;") -
-                input#mapEndDate.input-small(type="text")
-                label(for="mapSite",style="margin-right:5px;margin-left:15px;") 站点：
-                select#mapSite
-                    for site in sites
-                        option(value="#{site._id}") #{site.companyName}-#{site.siteName}
 
-                button#mapSubmit.btn.btn-small.btn-primary(type="button",style="margin-left:10px;") 查询
-            div#map_canvas.maps
-        section(style='display:none;')
+        section
             form.form-inline
                 label(for="cpyStartDate",style="margin-right:5px;") 时间：
                 input#cpyStartDate.input-small(type="text")
@@ -120,35 +76,10 @@ block body
 
 
 block script
-    script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBrDF1WpWGJlzMyNUs4rOZ-Lgz3nNYb6PQ&sensor=true')
-    script(src='/js/markerwithlabel_packed.js')
-    script(src='/js/highcharts/highcharts.js')
     script(src='/bootstrap/js/bootstrap-datepicker.js')
     script(src='/bootstrap/js/bootstrap-datepicker.zh-CN.js')
     script
-        var map;
-        var markers = [];
         $(function () {
-            $('#mapStartDate').datepicker({
-                format: 'yyyy-mm-dd',
-                language: 'zh-CN'
-            });
-            $('#mapStartDate').datepicker('setDate',new Date());
-            $('#mapEndDate').datepicker({
-                format: 'yyyy-mm-dd',
-                language: 'zh-CN'
-            });
-            $('#mapEndDate').datepicker('setDate',new Date());
-
-            $('#mapSubmit').on('click', function(){
-                if(map.getZoom()>6){
-                    loadMapMarker('市');
-                }else if(map.getZoom()<=6 && map.getZoom()>3){
-                    loadMapMarker('省');
-                }else if(map.getZoom()<=3){
-                    loadMapMarker('国');
-                }
-            });
 
             $('#cpyStartDate').datepicker({
                 format: 'yyyy-mm-dd',
@@ -165,220 +96,10 @@ block script
                 loadCompany(0,20);
             });
 
-            $('.tabs a').on("click", function(e){
-                $('.tabs a').removeClass('selected');
-                $(this).addClass('selected');
-                var index = $('.tabs a').index($(this));
-                $('.main section').hide().eq(index).show();
-                if(index === 1 && !map){
-                    var pos = new google.maps.LatLng(36.6509970, 117.1204970);
-                    var mapOptions = {
-                      center: pos,
-                      zoom: 4,
-                      mapTypeId: google.maps.MapTypeId.ROADMAP
-                    };
-
-                    map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-                    loadMapMarker('省');
-                    google.maps.event.addListener(map, 'zoom_changed', function() {
-                        if(map.getZoom()>6 && map.level != '市'){
-                            loadMapMarker('市');
-                        }else if(map.getZoom()<=6 && map.getZoom()>3 && map.level != '省'){
-                            loadMapMarker('省');
-                        }else if(map.getZoom()<=3 && map.level != '国'){
-                            loadMapMarker('国');
-                        }
-                    });
-
-                }else if(index === 2){
-
-                }
-            });
-
-
-
-            $.ajax({
-                url: '/manage/statistics/dayCount',
-                dataType: 'json',
-                cache: false
-            }).done(function(result){
-                var chart = new Highcharts.Chart({
-                    chart: {
-                        renderTo: 'dayChart',
-                        type: 'line'
-                    },
-                    title: {
-                        text: '每日流量统计',
-                        x: -20 //center
-                    },
-                    subtitle: {
-                        text: '最近一个月的访问计数',
-                        x: -20
-                    },
-                    xAxis: {
-                        categories: result.categories,
-                        labels: {
-                            step: result.step,
-                            formatter: function() {
-                                return this.value.substr(5);
-                            }
-                        }
-                    },
-                    yAxis: {
-                        title: {
-                            text: '访问量(PV)'
-                        },
-                        plotLines: [{
-                            value: 0,
-                            width: 1,
-                            color: '#808080'
-                        }]
-                    },
-                    tooltip: {
-                        formatter: function() {
-                            return '<b>'+ this.series.name +'</b><br/>'+
-                            this.x +': '+ this.y + '次';
-                        }
-                    },
-                    plotOptions: {
-                        line: {
-                            dataLabels: {
-                                enabled: true
-                            },
-                            enableMouseTracking: true
-                        },
-                        series: {
-                            cursor: 'pointer',
-                            point: {
-                                events: {
-                                    click: function() {
-                                        showPieChart(this.category);
-                                    }
-                                }
-                            },
-                            marker: {
-                                lineWidth: 1
-                            }
-                        }
-                    },
-                    series: [{
-                        name: '日流量',
-                        data: result.data
-                    }],
-                    credits: {
-                        enabled: false
-                    }
-                });
-            });
-
             loadCompany(0,20);
 
         });
 
-        function showPieChart(date){
-            $('#pieChart').empty();
-            $('#detailChartsLabel').text(date+'流量统计');
-            $.ajax({
-                url: '/manage/statistics/daySiteCount',
-                dataType: 'json',
-                data:{
-                    date:date
-                },
-                cache: false
-            }).done(function(result){
-                var chart = new Highcharts.Chart({
-                    chart: {
-                        renderTo: 'pieChart',
-                        plotBackgroundColor: null,
-                        plotBorderWidth: null,
-                        plotShadow: false
-                    },
-                    title: {
-                        text: '流量组成'
-                    },
-                    tooltip: {
-                        pointFormat: '{series.name}: <b>{point.y}次</b>',
-                        percentageDecimals: 1
-                    },
-                    plotOptions: {
-                        pie: {
-                            allowPointSelect: true,
-                            cursor: 'pointer',
-                            dataLabels: {
-                                enabled: true,
-                                color: '#000000',
-                                connectorColor: '#000000',
-                                formatter: function() {
-                                    return '<b>'+ this.point.name +'</b>: '+ this.percentage.toFixed(1) +' %';
-                                }
-                            }
-                        }
-                    },
-                    series: [{
-                        type: 'pie',
-                        name: '访问次数',
-                        data: result.data
-                    }],
-                    credits: {
-                        enabled: false
-                    }
-                });
-            });
-
-            $('#detailChartsModal').modal('show');
-        }
-
-
-        function addMarker(item) {
-            var marker = new MarkerWithLabel({
-                position: new google.maps.LatLng(item.gisInfo.lat, item.gisInfo.lng),
-                draggable: false,
-                raiseOnDrag: false,
-                map: map,
-                title:item._id,
-                labelContent: item.value,
-                labelAnchor: new google.maps.Point(20, 0),
-                labelClass: "labels", // the CSS class for the label
-                labelStyle: {opacity: 1.00}
-            });
-            markers.push(marker);
-        }
-
-        function setAllMap(map) {
-            for (var i = 0; i < markers.length; i++) {
-              markers[i].setMap(map);
-            }
-        }
-
-        function clearOverlays() {
-            setAllMap(null);
-            markers = [];
-        }
-
-        function loadMapMarker(level){
-            $.ajax({
-                url: '/manage/statistics/gis',
-                dataType: 'json',
-                data: {
-                    startDate: $('#mapStartDate').val(),
-                    endDate: $('#mapEndDate').val(),
-                    siteId: $('#mapSite').val(),
-                    level: level
-                },
-                cache: false
-            }).done(function(results){
-                clearOverlays();
-                var items = results.items;
-                for(var i=0; i<items.length; i++){
-                    var r = items[i];
-                    if(r.gisInfo){
-                        addMarker(r);
-                    }
-                }
-                map.level = level;
-            });
-
-        }
 
         function loadCompany(pageNo, pageSize){
             if(pageNo >= 0){

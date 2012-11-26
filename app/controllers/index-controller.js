@@ -19,7 +19,7 @@ module.exports = function(app){
             if(user){
                 req.session.error = '';
                 req.session.user = user;
-                res.redirect('/manage/statistics');
+                res.redirect('/manage/countCharts');
             }else{
                 User.count().exec(function (err, count) {
                     if(count){

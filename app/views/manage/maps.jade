@@ -1,0 +1,150 @@
+extends ../layout
+block style
+    link(rel='stylesheet', href='/bootstrap/css/datepicker.css')
+    style
+        .maps{
+            min-width: 400px;
+            height: 600px;
+            margin: 0 auto ;
+            border: 1px solid #b8bcc0;
+            margin-bottom: 40px;
+        }
+        .labels {
+            color: black;
+            background-color: #fff;
+            font-weight: bold;
+            text-align: center;
+            width: 40px;
+            border: 1px solid #ccc;
+            margin-bottom: 40px;
+        }
+
+block body
+    include ../includes/banner
+    nav.nav
+        div.navContent
+            div.header
+                h1 访问统计
+                ul.tabs
+                    li: a(href="countCharts") 流量统计
+                    li: a.selected(href="maps") 地址分布
+                    li: a(href="companyCount") 公司访问
+            include ../includes/login
+    div.main
+
+        section
+            form.form-inline
+                label(for="mapStartDate",style="margin-right:5px;") 时间：
+                input#mapStartDate.input-small(type="text")
+                label(for="mapEndDate",style="margin-right:5px;margin-left:5px;") -
+                input#mapEndDate.input-small(type="text")
+                label(for="mapSite",style="margin-right:5px;margin-left:15px;") 站点：
+                select#mapSite
+                    for site in sites
+                        option(value="#{site._id}") #{site.companyName}-#{site.siteName}
+
+                button#mapSubmit.btn.btn-small.btn-primary(type="button",style="margin-left:10px;") 查询
+            div#map_canvas.maps
+
+block script
+    script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBrDF1WpWGJlzMyNUs4rOZ-Lgz3nNYb6PQ&sensor=true')
+    script(src='/js/markerwithlabel_packed.js')
+    script(src='/bootstrap/js/bootstrap-datepicker.js')
+    script(src='/bootstrap/js/bootstrap-datepicker.zh-CN.js')
+    script
+        var map;
+        var markers = [];
+        $(function () {
+            $('#mapStartDate').datepicker({
+                format: 'yyyy-mm-dd',
+                language: 'zh-CN'
+            });
+            $('#mapStartDate').datepicker('setDate',new Date());
+            $('#mapEndDate').datepicker({
+                format: 'yyyy-mm-dd',
+                language: 'zh-CN'
+            });
+            $('#mapEndDate').datepicker('setDate',new Date());
+
+            $('#mapSubmit').on('click', function(){
+                if(map.getZoom()>6){
+                    loadMapMarker('市');
+                }else if(map.getZoom()<=6 && map.getZoom()>3){
+                    loadMapMarker('省');
+                }else if(map.getZoom()<=3){
+                    loadMapMarker('国');
+                }
+            });
+
+            var pos = new google.maps.LatLng(36.6509970, 117.1204970);
+            var mapOptions = {
+              center: pos,
+              zoom: 4,
+              mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+
+            map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+            loadMapMarker('省');
+            google.maps.event.addListener(map, 'zoom_changed', function() {
+                if(map.getZoom()>6 && map.level != '市'){
+                    loadMapMarker('市');
+                }else if(map.getZoom()<=6 && map.getZoom()>3 && map.level != '省'){
+                    loadMapMarker('省');
+                }else if(map.getZoom()<=3 && map.level != '国'){
+                    loadMapMarker('国');
+                }
+            });
+        });
+
+
+        function addMarker(item) {
+            var marker = new MarkerWithLabel({
+                position: new google.maps.LatLng(item.gisInfo.lat, item.gisInfo.lng),
+                draggable: false,
+                raiseOnDrag: false,
+                map: map,
+                title:item._id,
+                labelContent: item.value,
+                labelAnchor: new google.maps.Point(20, 0),
+                labelClass: "labels", // the CSS class for the label
+                labelStyle: {opacity: 1.00}
+            });
+            markers.push(marker);
+        }
+
+        function setAllMap(map) {
+            for (var i = 0; i < markers.length; i++) {
+              markers[i].setMap(map);
+            }
+        }
+
+        function clearOverlays() {
+            setAllMap(null);
+            markers = [];
+        }
+
+        function loadMapMarker(level){
+            $.ajax({
+                url: '/manage/statistics/gis',
+                dataType: 'json',
+                data: {
+                    startDate: $('#mapStartDate').val(),
+                    endDate: $('#mapEndDate').val(),
+                    siteId: $('#mapSite').val(),
+                    level: level
+                },
+                cache: false
+            }).done(function(results){
+                clearOverlays();
+                var items = results.items;
+                for(var i=0; i<items.length; i++){
+                    var r = items[i];
+                    if(r.gisInfo){
+                        addMarker(r);
+                    }
+                }
+                map.level = level;
+            });
+
+        }
+

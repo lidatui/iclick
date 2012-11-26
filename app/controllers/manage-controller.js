@@ -249,10 +249,10 @@ module.exports = function(app){
             })
     });
 
-    app.get('/manage/statistics', restrict, statistics, function(req, res){
+    app.get('/manage/companyCount', restrict, statistics, function(req, res){
 
         AccessControl.find({}).sort('companyName').exec(function (err, acs) {
-            res.render('manage/statistics', {
+            res.render('manage/companyCount', {
                 title : '投资一点通-访问统计'
                 ,description: 'statistics Description'
                 ,author: 'miemiedev'
@@ -260,9 +260,28 @@ module.exports = function(app){
                 ,sites: acs
             });
         });
+    });
 
+    app.get('/manage/maps', restrict, statistics, function(req, res){
 
+        AccessControl.find({}).sort('companyName').exec(function (err, acs) {
+            res.render('manage/maps', {
+                title : '投资一点通-访问统计'
+                ,description: 'statistics Description'
+                ,author: 'miemiedev'
+                ,l1: true,l2: false,l3: false,l4: false,l5: false,l6: false
+                ,sites: acs
+            });
+        });
+    });
 
+    app.get('/manage/countCharts', restrict, statistics, function(req, res){
+        res.render('manage/countCharts', {
+            title : '投资一点通-访问统计'
+            ,description: 'statistics Description'
+            ,author: 'miemiedev'
+            ,l1: true,l2: false,l3: false,l4: false,l5: false,l6: false
+        });
     });
 
     app.get('/manage/statistics/dayCount', function(req, res){
@@ -343,6 +362,18 @@ module.exports = function(app){
             });
         });
 
+    });
+
+    app.get('/manage/maps', restrict, statistics, function(req, res){
+        AccessControl.find({}).sort('companyName').exec(function (err, acs) {
+            res.render('manage/maps', {
+                title : '投资一点通-访问统计'
+                ,description: 'statistics Description'
+                ,author: 'miemiedev'
+                ,l1: true,l2: false,l3: false,l4: false,l5: false,l6: false
+                ,sites: acs
+            });
+        });
     });
 
     app.get('/manage/statistics/gis', function(req, res){
