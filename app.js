@@ -132,7 +132,7 @@ var socketiostore = new (require('socket.io-clusterhub'));
                     require(schedulers_path+'/'+file)()
                 }
             })
-            console.log('Scheduler started...');
+            console.log('Scheduler all loaded...');
 //        }
 
 //    });
