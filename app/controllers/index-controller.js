@@ -24,7 +24,7 @@ module.exports = function(app){
                 User.count().exec(function (err, count) {
                     if(count){
                         req.session.error = '验证失败，请重新登陆！';
-                        res.redirect('login');
+                        res.redirect('/manage/login');
                     }else{
                         var user = new User({
                             loginName: 'admin',
@@ -42,7 +42,7 @@ module.exports = function(app){
                         user.save(function(err){
                             if(err) return next(err);
                             req.session.error = '账号已生成，请重新登陆！';
-                            res.redirect('login');
+                            res.redirect('/manage/login');
                         });
                     }
                 });
