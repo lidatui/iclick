@@ -462,7 +462,7 @@ module.exports = function(app){
                 });
                 return {count: total};
             },
-            out: 'companyCount',
+            out: 't_companyCount',
             verbose: true
         };
 
@@ -549,7 +549,7 @@ module.exports = function(app){
                 return {count: total};
             },
             query: { 'accessControl._id':mongoose.Types.ObjectId(siteId), '_id': {$gte: startDate,$lt: endDate}},
-            out: 'companyCount',
+            out: 't_companyCount',
             verbose: true
         };
         Access.mapReduce(o, function(err, model, stats){

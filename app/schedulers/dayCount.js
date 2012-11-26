@@ -5,7 +5,7 @@ module.exports = function(){
     var AccessControl = mongoose.model('AccessControl');
     var DayCount = mongoose.model('DayCount');
     console.log('DayCount scheduler loaded...');
-    new CronJob('0 * * * * *', function(){
+    new CronJob('0 0 0 * * *', function(){
         console.log('DayCount scheduler start...');
         var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
         startDate.setDate(startDate.getDate() - 1);
