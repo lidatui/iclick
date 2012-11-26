@@ -2,8 +2,9 @@
 module.exports = function(){
     var CronJob = require('cron').CronJob;
     var Access = mongoose.model('Access');
-
+    console.log('Sweep scheduler loaded...');
     new CronJob('0 0 0 * * *', function(){
+        console.log('Sweep scheduler start...');
         var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
         startDate.setFullYear(startDate.getFullYear() - 1);
         var startId = objectIdWithTimestamp(startDate);
@@ -16,17 +17,11 @@ module.exports = function(){
     },null,true);
 
     function objectIdWithTimestamp(timestamp){
-        // Convert string date to Date object (otherwise assume timestamp is a date)
         if (typeof(timestamp) == 'string') {
             timestamp = new Date(timestamp);
         }
-
-        // Convert date object to hex seconds since Unix epoch
         var hexSeconds = Math.floor(timestamp/1000).toString(16);
-
-        // Create an ObjectId with that hex timestamp
         var constructedObjectId = mongoose.Types.ObjectId(hexSeconds + "0000000000000000");
-
         return constructedObjectId
     }
 }
