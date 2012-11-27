@@ -20,7 +20,11 @@ block style
         }
 
         .textMarker{
-            position: relative;
+            position: absolute;
+            padding: 0px;
+            margin: 0px;
+            border: 0px;
+            cursor: pointer;
             width: 100px;
             height: 100px;
         }
@@ -91,11 +95,11 @@ block script
             $('#mapEndDate').datepicker('setDate',new Date());
 
             $('#mapSubmit').on('click', function(){
-                if(map.getZoom()>6){
+                if(map.getZoom()>7){
                     loadMapMarker('市');
-                }else if(map.getZoom()<=6 && map.getZoom()>3){
+                }else if(map.getZoom()<=7 && map.getZoom()>4){
                     loadMapMarker('省');
-                }else if(map.getZoom()<=3){
+                }else if(map.getZoom()<=4){
                     loadMapMarker('国');
                 }
             });
@@ -104,11 +108,11 @@ block script
             map.enableScrollWheelZoom();
             loadMapMarker('省');
             map.addEventListener("zoomend", function(){
-                if(map.getZoom()>6 && map.level != '市'){
+                if(map.getZoom()>7 && map.level != '市'){
                     loadMapMarker('市');
-                }else if(map.getZoom()<=6 && map.getZoom()>3 && map.level != '省'){
+                }else if(map.getZoom()<=7 && map.getZoom()>4 && map.level != '省'){
                     loadMapMarker('省');
-                }else if(map.getZoom()<=3 && map.level != '国'){
+                }else if(map.getZoom()<=4 && map.level != '国'){
                     loadMapMarker('国');
                 }
             });
@@ -140,22 +144,14 @@ block script
         }
 
         function addMarker(item) {
-            var marker1 = new TextMarker(item.value, new BMap.Point(item.gisInfo.lng, item.gisInfo.lat));  // 创建标注
+            var marker1 = new TextMarker(item.value,new BMap.Point(item.gisInfo.lng, item.gisInfo.lat),item._id);  // 创建标注
             map.addOverlay(marker1);              // 将标注添加到地图中
         }
 
-
-
-
-
-
-
-
-
-
-        function TextMarker(text,point){
+        function TextMarker(text,point,title){
             this.point = point;
             this.text = text;
+            this.title = title;
         };
         TextMarker.prototype = new BMap.Overlay();
         TextMarker.prototype.initialize = function(map){
@@ -188,6 +184,7 @@ block script
         TextMarker.prototype.__updateText = function(){
             if (this.label) {
                 this.label.innerHTML = this.text;
+                this.label.title = this.title;
             }
         };
 
