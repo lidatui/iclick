@@ -103,6 +103,15 @@ block script
             map.centerAndZoom(new BMap.Point(112.5488790, 37.8705900), 10);
             map.enableScrollWheelZoom();
             loadMapMarker('省');
+            map.addEventListener("zoomend", function(){
+                if(map.getZoom()>6 && map.level != '市'){
+                    loadMapMarker('市');
+                }else if(map.getZoom()<=6 && map.getZoom()>3 && map.level != '省'){
+                    loadMapMarker('省');
+                }else if(map.getZoom()<=3 && map.level != '国'){
+                    loadMapMarker('国');
+                }
+            });
         });
 
         function loadMapMarker(level){
