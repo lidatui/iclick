@@ -1,5 +1,6 @@
 
 module.exports = function(){
+    var DateUtils = require('../utils/DateUtils');
     var CronJob = require('cron').CronJob;
     var Access = mongoose.model('Access');
     var AccessControl = mongoose.model('AccessControl');
@@ -7,7 +8,8 @@ module.exports = function(){
     console.log('SiteHourCount scheduler loaded...');
     new CronJob('0 0 * * * *', function(){
         console.log('SiteHourCount scheduler start...');
-        var startTime = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours(),0,0);
+        var now = DateUtils.now();
+        var startTime = new Date(now.getFullYear(),now.getMonth(),now.getDate(),now.getHours(),0,0);
         var endTime = new Date(startTime);
         startTime.setHours(startTime.getHours() - 1);
 

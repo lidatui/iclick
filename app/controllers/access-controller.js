@@ -1,5 +1,6 @@
 
 module.exports = function(app){
+    var DateUtils = require('../utils/DateUtils');
     var http = require('http');
     var handlebars = require("handlebars");
     var dateFormat = require('dateformat');

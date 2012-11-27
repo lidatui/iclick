@@ -1,16 +1,18 @@
 
 module.exports = function(){
+    var DateUtils = require('../utils/DateUtils');
     var CronJob = require('cron').CronJob;
     var Access = mongoose.model('Access');
     var AccessControl = mongoose.model('AccessControl');
     var SiteDayCount = mongoose.model('SiteDayCount');
     console.log('SiteDayCount scheduler loaded...');
-    new CronJob('0 0 0 * * *', function(){
+    new CronJob('0 0 16 * * *', function(){
         console.log('SiteDayCount scheduler start...');
-        var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+        var now = DateUtils.now();
+        var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
         startDate.setDate(startDate.getDate() - 1);
         var startId = objectIdWithTimestamp(startDate);
-        var endDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+        var endDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
         var endId = objectIdWithTimestamp(endDate);
 
         var o = {

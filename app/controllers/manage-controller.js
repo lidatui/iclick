@@ -4,6 +4,7 @@ module.exports = function(app){
     var fs = require('fs');
     var handlebars = require("handlebars");
     var dateFormat = require('dateformat');
+    var DateUtils = require('../utils/DateUtils');
     var Article = mongoose.model('Article');
     var Template = mongoose.model('Template');
     var AccessControl = mongoose.model('AccessControl');
@@ -291,7 +292,8 @@ module.exports = function(app){
     });
 
     app.get('/manage/statistics/dayCount', function(req, res){
-        var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+        var now = DateUtils.now();
+        var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
         var endDate = new Date (startDate);
         startDate.setMonth(startDate.getMonth() -1);
         var startId = objectIdWithTimestamp(startDate);
@@ -307,6 +309,7 @@ module.exports = function(app){
 
             var list = [];
             function callback(){
+
 
                 list.sort(function(a,b){
                     return a['_id'] - b['_id'];
@@ -324,7 +327,7 @@ module.exports = function(app){
                     , step: date / 8
                 });
             }
-            var wait = 3;
+            var wait = 2;
             //取天表
             SiteDayCount.find({'accessControl._id':{$in: acIds},'_id': {$gte: startId,$lt: endId}}, function(err, dayCounts){
                 dayCounts.forEach(function(dayCount){
@@ -339,43 +342,43 @@ module.exports = function(app){
             });
 
             //取小时表
-            function formatDate(d){
-                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
-                var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-                var hour = d.getHours() < 10 ? '0'+ d.getHours(): d.getHours();
-                return d.getFullYear()+'-'+ month +'-'+ date + ' ' +hour+':00:00';
-            }
-            startDate = formatDate(endDate);
-            endDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours());
-            endDate = formatDate(endDate);
-            var o = {
-                map : function (){
-                    if(this.time){
-                        emit(this.time.substr(0,11), 1);
-                    }
-                }
-                , reduce: function (k, vals) {
-                    var total = 0;
-                    for ( var i=0; i<vals.length; i++ )
-                        total += vals[i];
-                    return total;
-                }
-                , query : {'aid':{$in: acIds},'time': {$gte: startDate,$lt: endDate}}
-            };
-            SiteHourCount.mapReduce(o, function(err, hourCounts){
-                hourCounts = hourCounts ? hourCounts : [];
-                hourCounts.forEach(function(hourCount){
-                    list.push({
-                        _id: hourCount.time,
-                        value: hourCount
-                    });
-                });
-                if(--wait == 0){
-                    callback();
-                }
-            });
+//            function formatDate(d){
+//                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
+//                var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
+//                var hour = d.getHours() < 10 ? '0'+ d.getHours(): d.getHours();
+//                return d.getFullYear()+'-'+ month +'-'+ date + ' ' +hour+':00:00';
+//            }
+//            startDate = formatDate(endDate);
+//            endDate = new Date(now.getFullYear(),now.getMonth(),now.getDate(),now.getHours());
+//            endDate = formatDate(endDate);
+//            var o = {
+//                map : function (){
+//                    if(this.time){
+//                        emit(this.time.substr(0,11), 1);
+//                    }
+//                }
+//                , reduce: function (k, vals) {
+//                    var total = 0;
+//                    for ( var i=0; i<vals.length; i++ )
+//                        total += vals[i];
+//                    return total;
+//                }
+//                , query : {'acId':{$in: acIds},'time': {$gte: startDate,$lt: endDate}}
+//            };
+//            SiteHourCount.mapReduce(o, function(err, hourCounts){
+//                hourCounts = hourCounts ? hourCounts : [];
+//                hourCounts.forEach(function(hourCount){
+//                    list.push({
+//                        _id: hourCount._id,
+//                        value: hourCount.value
+//                    });
+//                });
+//                if(--wait == 0){
+//                    callback();
+//                }
+//            });
             //最后一小时
-            startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours());
+            startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate(),now.getHours());
             startId = objectIdWithTimestamp(startDate);
             var o = {
                 map : function (){
@@ -721,8 +724,8 @@ module.exports = function(app){
     app.get('/manage/access/list',restrict,access, function(req, res){
         var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
             , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
-
-        var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+        var now = DateUtils.now();
+        var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
         var startId = objectIdWithTimestamp(startDate);
 
         Access

@@ -16,6 +16,7 @@
         "dateformat":"*",
         "useragent":"*",
         "cron":"*",
+        "time":"*",
         "connect-mongodb":"*",
         "socket.io-clusterhub":"*"
     },
