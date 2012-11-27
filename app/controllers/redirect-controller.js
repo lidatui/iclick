@@ -22,7 +22,6 @@ module.exports = function(app){
             }
 
             var i = new Buffer(req.query['i'], 'base64').toString('utf8');
-            console.dir(i);
             res.redirect(article.targetUrl+'?i='+req.query['i']);
 
         });

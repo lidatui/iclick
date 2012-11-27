@@ -167,7 +167,7 @@ module.exports = function(app){
             .sort('-_id')
             .exec(function (err, article) {
                 if(!article){
-                    res.send('');
+                    res.send([]);
                     return;
                 }
                 article = article.toObject();
@@ -301,12 +301,10 @@ module.exports = function(app){
                 return ac._id;
             });
             var o = {};
-            o.map = function () {
-                var d = this._id.getTimestamp();
-                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
-                var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-                var result = d.getFullYear()+'-'+ month +'-'+ date;
-                emit(result, 1);
+            o.map = function (){
+                if(this.pageInfo && this.pageInfo.at){
+                    emit(this.pageInfo.at.substr(0,11), 1);
+                }
             }
             o.reduce = function (k, vals) {
                 var total = 0;
@@ -452,13 +450,12 @@ module.exports = function(app){
 
         var o = {
             map: function(){
-                var d = this._id.getTimestamp();
-                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
-                var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-                var day = d.getFullYear()+'-'+ month +'-'+ date;
-                emit({
-                    day:day,acId: this.accessControl._id
-                },{count: 1});
+                if(this.pageInfo && this.pageInfo.at){
+                    emit({
+                        day:this.pageInfo.at.substr(0,11),acId: this.accessControl._id
+                    },{count: 1});
+                }
+
             },
             reduce: function(k, vals){
                 var total = 0;
@@ -477,6 +474,15 @@ module.exports = function(app){
             o.query = { '_id': {$gte: startDate,$lt: endDate}};
         }
         Access.mapReduce(o, function (err, model, stats){
+            if(!model){
+                return res.send({
+                    items: []
+                    , pageNo: pageNo
+                    , pageSize: pageSize
+                    , totalCount: 0
+                });
+
+            }
             AccessControl.find({},function(err, acs){
                 var acIds = acs.map(function(ac){
                    return ac._id;
@@ -523,9 +529,6 @@ module.exports = function(app){
                         })
                     })
             });
-
-
-
         });
     });
 
@@ -558,6 +561,9 @@ module.exports = function(app){
             verbose: true
         };
         Access.mapReduce(o, function(err, model, stats){
+            if(!model){
+                return res.send([]);
+            }
             model
                 .find()
                 .sort('-value.count')
