@@ -3,10 +3,10 @@ module.exports = function(){
     var CronJob = require('cron').CronJob;
     var Access = mongoose.model('Access');
     var AccessControl = mongoose.model('AccessControl');
-    var DayCount = mongoose.model('DayCount');
-    console.log('DayCount scheduler loaded...');
+    var SiteDayCount = mongoose.model('SiteDayCount');
+    console.log('SiteDayCount scheduler loaded...');
     new CronJob('0 0 0 * * *', function(){
-        console.log('DayCount scheduler start...');
+        console.log('SiteDayCount scheduler start...');
         var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
         startDate.setDate(startDate.getDate() - 1);
         var startId = objectIdWithTimestamp(startDate);
@@ -31,7 +31,7 @@ module.exports = function(){
                 return {count: total};
             },
             query: { '_id': {$gte: startId,$lt: endId}},
-            out: 'dayCount',
+            out: 't_siteDayCount',
             verbose: true
         };
 
@@ -45,14 +45,14 @@ module.exports = function(){
 
                         for(var j=0; j<results.length; j++){
 
-                            var dayCount = new DayCount({
+                            var dayCount = new SiteDayCount({
                                 acId: results[j]._id['acId'],
                                 time: results[j]._id['time'],
                                 count: results[j].value.count
                             });
                             dayCount.save();
                         }
-                        console.log('DayCount scheduler done...%s',formatDate(startDate));
+                        console.log('SiteDayCount scheduler done...%s',formatDate(startDate));
 
                     })
             });

@@ -3,10 +3,10 @@ module.exports = function(){
     var CronJob = require('cron').CronJob;
     var Access = mongoose.model('Access');
     var AccessControl = mongoose.model('AccessControl');
-    var HourCount = mongoose.model('HourCount');
-    console.log('HourCount scheduler loaded...');
-    new CronJob('0 * * * * *', function(){
-        console.log('HourCount scheduler start...');
+    var SiteHourCount = mongoose.model('SiteHourCount');
+    console.log('SiteHourCount scheduler loaded...');
+    new CronJob('0 0 * * * *', function(){
+        console.log('SiteHourCount scheduler start...');
         var startTime = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours(),0,0);
         startTime.setHours(startTime.getHours() - 1);
         var endTime = new Date(startTime);
@@ -32,7 +32,7 @@ module.exports = function(){
                 return {count: total};
             },
             query: { '_id': {$gte: startId,$lt: endId}},
-            out: 'hourCount',
+            out: 't_siteHourCount',
             verbose: true
         };
 
@@ -46,14 +46,14 @@ module.exports = function(){
 
                         for(var j=0; j<results.length; j++){
 
-                            var hourCount = new HourCount({
+                            var hourCount = new SiteHourCount({
                                 acId: results[j]._id['acId'],
                                 time: results[j]._id['time'],
                                 count: results[j].value.count
                             });
                             hourCount.save();
                         }
-                        console.log('HourCount scheduler done...%s',formatDate(startTime));
+                        console.log('SiteHourCount scheduler done...%s',formatDate(startTime));
 
                     })
             });
