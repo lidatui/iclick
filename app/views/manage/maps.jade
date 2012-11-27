@@ -99,13 +99,51 @@ block script
                     loadMapMarker('国');
                 }
             });
-            var map = new BMap.Map("map_canvas");
+            map = new BMap.Map("map_canvas");
             map.centerAndZoom(new BMap.Point(112.5488790, 37.8705900), 10);
             map.enableScrollWheelZoom();
-            var marker1 = new TextMarker('12345', new BMap.Point(112.5488790, 37.8705900));  // 创建标注
-            map.addOverlay(marker1);              // 将标注添加到地图中
-
+            loadMapMarker('省');
         });
+
+        function loadMapMarker(level){
+            $.ajax({
+                url: '/manage/statistics/gis',
+                dataType: 'json',
+                data: {
+                    startDate: $('#mapStartDate').val(),
+                    endDate: $('#mapEndDate').val(),
+                    siteId: $('#mapSite').val(),
+                    level: level
+                },
+                cache: false
+            }).done(function(results){
+                map.clearOverlays();
+                var items = results.items;
+                for(var i=0; i<items.length; i++){
+                    var r = items[i];
+                    if(r.gisInfo){
+                        addMarker(r);
+                    }
+                }
+                map.level = level;
+            });
+
+        }
+
+        function addMarker(item) {
+            var marker1 = new TextMarker(item.value, new BMap.Point(item.gisInfo.lng, item.gisInfo.lat));  // 创建标注
+            map.addOverlay(marker1);              // 将标注添加到地图中
+        }
+
+
+
+
+
+
+
+
+
+
         function TextMarker(text,point){
             this.point = point;
             this.text = text;
