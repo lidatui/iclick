@@ -11,6 +11,8 @@ module.exports = function(app){
     var Access = mongoose.model('Access');
     var IpInfo = mongoose.model('IpInfo');
     var GisInfo = mongoose.model('GisInfo');
+    var SiteDayCount = mongoose.model('SiteDayCount');
+    var SiteHourCount = mongoose.model('SiteHourCount');
 
     function restrict(req, res, next) {
         if (req.session.user) {
@@ -289,43 +291,116 @@ module.exports = function(app){
     });
 
     app.get('/manage/statistics/dayCount', function(req, res){
-        var startDate = new Date();
+        var startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+        var endDate = new Date (startDate);
         startDate.setMonth(startDate.getMonth() -1);
-        var endDate = new Date ();
-        endDate.setDate ( endDate.getDate() + 1 );
-        startDate = objectIdWithTimestamp(startDate);
-        endDate = objectIdWithTimestamp(endDate);
+        var startId = objectIdWithTimestamp(startDate);
+        endDate.setDate ( endDate.getDate());
+        var endId = objectIdWithTimestamp(endDate);
+
+
 
         AccessControl.find({},function(err, acs){
             var acIds = acs.map(function(ac){
                 return ac._id;
             });
-            var o = {};
-            o.map = function (){
-                if(this.pageInfo && this.pageInfo.at){
-                    emit(this.pageInfo.at.substr(0,11), 1);
-                }
-            }
-            o.reduce = function (k, vals) {
-                var total = 0;
-                for ( var i=0; i<vals.length; i++ )
-                    total += vals[i];
-                return total;
-            }
-            o.query = { 'accessControl._id':{$in: acIds},'_id': {$gte: startDate,$lt: endDate}};
-            Access.mapReduce(o, function (err, results) {
-                results = results ? results : [];
+
+            var list = [];
+            function callback(){
+
+                list.sort(function(a,b){
+                    return a['_id'] - b['_id'];
+                });
+
                 var date = [];
                 var data = [];
-                for(var i=0; i< results.length; i++){
-                    date.push(results[i]._id);
-                    data.push(results[i].value);
+                for(var i=0; i< list.length; i++){
+                    date.push(list[i]._id);
+                    data.push(list[i].value);
                 }
                 res.send({
                     categories: date
                     , data: data
                     , step: date / 8
                 });
+            }
+            var wait = 3;
+            //取天表
+            SiteDayCount.find({'accessControl._id':{$in: acIds},'_id': {$gte: startId,$lt: endId}}, function(err, dayCounts){
+                dayCounts.forEach(function(dayCount){
+                    list.push({
+                        _id: dayCount.time,
+                        value: dayCount
+                    });
+                });
+                if(--wait == 0){
+                    callback();
+                }
+            });
+
+            //取小时表
+            function formatDate(d){
+                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
+                var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
+                var hour = d.getHours() < 10 ? '0'+ d.getHours(): d.getHours();
+                return d.getFullYear()+'-'+ month +'-'+ date + ' ' +hour+':00:00';
+            }
+            startDate = formatDate(endDate);
+            endDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours());
+            endDate = formatDate(endDate);
+            var o = {
+                map : function (){
+                    if(this.time){
+                        emit(this.time.substr(0,11), 1);
+                    }
+                }
+                , reduce: function (k, vals) {
+                    var total = 0;
+                    for ( var i=0; i<vals.length; i++ )
+                        total += vals[i];
+                    return total;
+                }
+                , query : {'aid':{$in: acIds},'time': {$gte: startDate,$lt: endDate}}
+            };
+            SiteHourCount.mapReduce(o, function(err, hourCounts){
+                hourCounts = hourCounts ? hourCounts : [];
+                hourCounts.forEach(function(hourCount){
+                    list.push({
+                        _id: hourCount.time,
+                        value: hourCount
+                    });
+                });
+                if(--wait == 0){
+                    callback();
+                }
+            });
+            //最后一小时
+            startDate = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours());
+            startId = objectIdWithTimestamp(startDate);
+            var o = {
+                map : function (){
+                    if(this.pageInfo && this.pageInfo.at){
+                        emit(this.pageInfo.at.substr(0,11), 1);
+                    }
+                }
+                , reduce: function (k, vals) {
+                    var total = 0;
+                    for ( var i=0; i<vals.length; i++ )
+                        total += vals[i];
+                    return total;
+                }
+                , query : {
+                    'accessControl._id':{$in: acIds}
+                    , '_id': {$gte: startId}}
+            };
+            Access.mapReduce(o, function (err, results) {
+                results = results ? results : [];
+                for(var i=0; i< results.length; i++){
+                    list.push(results[i]);
+                }
+                if(--wait == 0){
+                    callback();
+                }
             });
         });
     });

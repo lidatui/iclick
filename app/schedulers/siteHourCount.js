@@ -8,8 +8,9 @@ module.exports = function(){
     new CronJob('0 0 * * * *', function(){
         console.log('SiteHourCount scheduler start...');
         var startTime = new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours(),0,0);
-        startTime.setHours(startTime.getHours() - 1);
         var endTime = new Date(startTime);
+        startTime.setHours(startTime.getHours() - 1);
+
         var startId = objectIdWithTimestamp(startTime);
         var endId = objectIdWithTimestamp(endTime);
 
