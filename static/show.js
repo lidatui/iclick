@@ -43,7 +43,7 @@ var _iclick = _iclick || [];
             var month = day.getMonth()+1 < 10 ? '0'+ day.getMonth()+1: day.getMonth()+1;
             var date = day.getDate() < 10 ? '0'+ day.getDate(): day.getDate();
             var result = day.getFullYear()+'-'+ month +'-'+ date;
-            this.setCookie('_iclick_at',result,d);
+            this.setCookie('_iclick_ld',result,d);
         }
     }, push:function (a) {
         var b = a.shift();
@@ -65,7 +65,7 @@ var _iclick = _iclick || [];
             a += "&h[unique_day]=" + this.uniqueDay();
             a += "&h[unique_month]=" + this.uniqueMonth();
             a += "&h[unique_year]=" + this.uniqueYear();
-            a += "&h[at]=" + this.at();
+            a += "&h[ld]=" + this.ld();
             a += "&h[screenx]=" + this.screenWidth();
             a += "&h[screeny]=" + this.screenHeight();
             a += "&h[browserx]=" + this.browserWidth();
@@ -130,11 +130,11 @@ var _iclick = _iclick || [];
             return 0
         }
         return this.getCookie('_iclick_unique') ? 0 : 1
-    }, at:function () {
+    }, ld:function () {
         if (!this.getCookie('_iclick_cookie')) {
             return ''
         }
-        return this.getCookie('_iclick_at')
+        return this.getCookie('_iclick_ld')
     }, screenWidth:function () {
         try {
             return screen.width

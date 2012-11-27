@@ -20,6 +20,7 @@ module.exports = function(app){
             return;
         }
         access.pageInfo = req.query['h'];
+        access.pageInfo['at'] = formatTime(new Date());
         access.host = getHostname(access.pageInfo.resource);
         AccessControl
             .findById(access.pageInfo.site_id)
@@ -171,4 +172,13 @@ module.exports = function(app){
             next(b);
         });
     };
+
+    function formatTime(d){
+        var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
+        var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
+        var hour = d.getHours() < 10 ? '0'+ d.getHours(): d.getHours();
+        var m = d.getMinutes() < 10 ? '0'+ d.getMinutes(): d.getMinutes();
+        var s = d.getSeconds() < 10 ? '0'+ d.getSeconds(): d.getSeconds();
+        return d.getFullYear()+'-'+ month +'-'+ date + ' ' +hour+':'+m+':'+s;
+    }
 }

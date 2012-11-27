@@ -166,6 +166,10 @@ module.exports = function(app){
             .findOne({})
             .sort('-_id')
             .exec(function (err, article) {
+                if(!article){
+                    res.send('');
+                    return;
+                }
                 article = article.toObject();
                 article.pubDate = dateFormat(article.pubDate,'mm-dd');
                 Template.find({}, function(err, tpls){
@@ -312,6 +316,7 @@ module.exports = function(app){
             }
             o.query = { 'accessControl._id':{$in: acIds},'_id': {$gte: startDate,$lt: endDate}};
             Access.mapReduce(o, function (err, results) {
+                results = results ? results : [];
                 var date = [];
                 var data = [];
                 for(var i=0; i< results.length; i++){
@@ -645,9 +650,7 @@ module.exports = function(app){
             .skip(pageSize * pageNo)
             .sort('-_id')
             .exec(function (err, accesses) {
-
                 Access.count({'_id': {$gte: startId}}).exec(function (err, count) {
-
                     var results = accesses.map(function(access){
                        return {
                            id: access._id,
@@ -739,17 +742,12 @@ module.exports = function(app){
 
     function objectIdWithTimestamp(timestamp)
     {
-        // Convert string date to Date object (otherwise assume timestamp is a date)
         if (typeof(timestamp) == 'string') {
             timestamp = new Date(timestamp);
         }
-
-        // Convert date object to hex seconds since Unix epoch
         var hexSeconds = Math.floor(timestamp/1000).toString(16);
-
-        // Create an ObjectId with that hex timestamp
         var constructedObjectId = mongoose.Types.ObjectId(hexSeconds + "0000000000000000");
-
         return constructedObjectId
     }
+
 };
