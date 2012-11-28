@@ -1,5 +1,5 @@
 
-var AccessControlSchema = new Schema({
+var SiteSchema = new Schema({
     siteName: {type : String, default : '', trim : true},
     host: {type : String, default : '', trim : true},
     companyName: {type : String, default : '', trim : true},
@@ -8,4 +8,4 @@ var AccessControlSchema = new Schema({
     email: {type : String, default : '', trim : true},
     template: {type: Schema.ObjectId, ref: 'Template'}
 });
-mongoose.model('AccessControl', AccessControlSchema);
+mongoose.model('Site', SiteSchema);

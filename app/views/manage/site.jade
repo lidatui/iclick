@@ -163,7 +163,9 @@ block script
                 $('#siteContact').val(item.contact);
                 $('#siteTel').val(item.tel);
                 $('#siteEmail').val(item.email);
-                $('#siteTemplate').val(item.template).change();
+                if(item.template){
+                    $('#siteTemplate').val(item.template._id).change();
+                }
 
                 $('#siteModal').data('item',item);
                 $('#siteModal').modal('show');
@@ -207,7 +209,7 @@ block script
                 });
                 $.ajax({
                     type: 'POST',
-                    url: '/manage/accessControl/save',
+                    url: '/manage/site/save',
                     data: param,
                     dataType: 'text',
                     cache: false
@@ -237,7 +239,7 @@ block script
                 }
                 $.ajax({
                     type: 'Get',
-                    url: '/manage/accessControl/remove',
+                    url: '/manage/site/remove',
                     data: {
                         _id: item._id
                     },
@@ -280,12 +282,6 @@ block script
             $('#siteModal .modal-body .alert-error').hide();
         }
 
-        function getItemCreateTime(objectId){
-            var str = objectId.toString().slice(0,8);
-            var time = parseInt(str,16) * 1000;
-            return new Date(time).toString('yyyy-MM-dd HH:mm:ss');
-        }
-
         function loadSite(pageNo, pageSize){
 
             if(pageNo >= 0){
@@ -302,7 +298,7 @@ block script
             }
 
             $.ajax({
-                url: '/manage/accessControl/list',
+                url: '/manage/site/list',
                 dataType: 'json',
                 data: {
                 pageNo: pageNo,
@@ -333,12 +329,14 @@ block script
                     trHtmls.push('<td>');
                     trHtmls.push('<a style="color: #08C;" href="mailto:');
                     trHtmls.push(item.email);
-                    trHtmls.push('?投资一点通网站嵌入代码" >');
+                    trHtmls.push('" >');
                     trHtmls.push(item.email);
                     trHtmls.push('</a>');
                     trHtmls.push('</td>');
                     trHtmls.push('<td>');
-                    trHtmls.push(item.templateName);
+                    if(item.template){
+                        trHtmls.push(item.template.name);
+                    }
                     trHtmls.push('</td>');
                     trHtmls.push('<td style="width: 100px;text-align: center;">');
                     trHtmls.push('<button type="button" data-site-id="');
@@ -356,7 +354,6 @@ block script
 
                 $('#siteBody').on('click','.btn',function(e){
                     var id = $(this).data('site-id');
-                    console.log(id);
                     $('#siteId').text(id);
                     $('#siteCode').modal('show');
                 });

@@ -3,7 +3,7 @@ module.exports = function(){
     var DateUtils = require('../utils/DateUtils');
     var CronJob = require('cron').CronJob;
     var Access = mongoose.model('Access');
-    var AccessControl = mongoose.model('AccessControl');
+    var Site = mongoose.model('Site');
     var SiteDayCount = mongoose.model('SiteDayCount');
     console.log('SiteDayCount scheduler loaded...');
     new CronJob('0 0 0 * * *', function(){
@@ -11,18 +11,14 @@ module.exports = function(){
         var now = DateUtils.now();
         var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
         startDate.setDate(startDate.getDate() - 1);
-        var startId = objectIdWithTimestamp(startDate);
+        var startId = DateUtils.objectId(startDate);
         var endDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
-        var endId = objectIdWithTimestamp(endDate);
+        var endId = DateUtils.objectId(endDate);
 
         var o = {
             map: function(){
-                var d = this._id.getTimestamp();
-                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
-                var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-                var time = d.getFullYear()+'-'+ month +'-'+ date;
                 emit({
-                    time:time,acId: this.accessControl._id
+                    time:this.timestamp.substr(0,10),site: this.site._id
                 },{count: 1});
             },
             reduce: function(k, vals){
@@ -38,23 +34,26 @@ module.exports = function(){
         };
 
         Access.mapReduce(o, function (err, model, stats){
-            AccessControl.find({},function(err, acs){
-                var acIds = acs.map(function(ac){
-                    return ac._id;
+            if(!model){
+                return;
+            }
+            Site.find({},function(err, sites){
+                var siteIds = sites.map(function(site){
+                    return site._id;
                 });
                 model
-                    .find({'_id.acId': {$in: acIds}}, function(err, results) {
+                    .find({'_id.site': {$in: siteIds}}, function(err, results) {
 
                         for(var j=0; j<results.length; j++){
 
                             var dayCount = new SiteDayCount({
-                                acId: results[j]._id['acId'],
-                                time: results[j]._id['time'],
+                                site: results[j]._id['site'],
+                                dataTime: new Date(results[j]._id['time']),
                                 count: results[j].value.count
                             });
                             dayCount.save();
                         }
-                        console.log('SiteDayCount scheduler done...%s',formatDate(startDate));
+                        console.log('SiteDayCount scheduler done...%s',DateUtils.format(startDate,'yyyy-mm-dd'));
 
                     })
             });
@@ -62,17 +61,4 @@ module.exports = function(){
 
     },null,true);
 
-    function objectIdWithTimestamp(timestamp){
-        if (typeof(timestamp) == 'string') {
-            timestamp = new Date(timestamp);
-        }
-        var hexSeconds = Math.floor(timestamp/1000).toString(16);
-        var constructedObjectId = mongoose.Types.ObjectId(hexSeconds + "0000000000000000");
-        return constructedObjectId
-    }
-    function formatDate(d){
-        var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
-        var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-        return d.getFullYear()+'-'+ month +'-'+ date;
-    }
 }

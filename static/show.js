@@ -39,11 +39,6 @@ var _iclick = _iclick || [];
             if (!this.getCookie('_iclick_unique')) {
                 this.setCookie('_iclick_unique', 1, i)
             }
-            var day = new Date();
-            var month = day.getMonth()+1 < 10 ? '0'+ day.getMonth()+1: day.getMonth()+1;
-            var date = day.getDate() < 10 ? '0'+ day.getDate(): day.getDate();
-            var result = day.getFullYear()+'-'+ month +'-'+ date;
-            this.setCookie('_iclick_ld',result,d);
         }
     }, push:function (a) {
         var b = a.shift();
@@ -55,21 +50,20 @@ var _iclick = _iclick || [];
         if (d) {
             b = d.getAttribute('data-site-id');
             a = d.src.replace('/show.js', '/show');
-            a += "?h[site_id]=" + b;
+            a += "?h[siteId]=" + b;
             a += "&h[resource]=" + this.resource();
             a += "&h[referrer]=" + this.referrer();
             a += "&h[title]=" + this.title();
-            a += "&h[user_agent]=" + this.agent();
+            a += "&h[userAgent]=" + this.agent();
             a += "&h[unique]=" + this.unique();
-            a += "&h[unique_hour]=" + this.uniqueHour();
-            a += "&h[unique_day]=" + this.uniqueDay();
-            a += "&h[unique_month]=" + this.uniqueMonth();
-            a += "&h[unique_year]=" + this.uniqueYear();
-            a += "&h[ld]=" + this.ld();
-            a += "&h[screenx]=" + this.screenWidth();
-            a += "&h[screeny]=" + this.screenHeight();
-            a += "&h[browserx]=" + this.browserWidth();
-            a += "&h[browsery]=" + this.browserHeight();
+            a += "&h[uniqueHour]=" + this.uniqueHour();
+            a += "&h[uniqueDay]=" + this.uniqueDay();
+            a += "&h[uniqueMonth]=" + this.uniqueMonth();
+            a += "&h[uniqueYear]=" + this.uniqueYear();
+            a += "&h[screenX]=" + this.screenWidth();
+            a += "&h[screenY]=" + this.screenHeight();
+            a += "&h[browserX]=" + this.browserWidth();
+            a += "&h[browserY]=" + this.browserHeight();
             a += "&timestamp=" + this.timestamp();
             a += "&callback=_iclick.callback";
         }
@@ -130,11 +124,6 @@ var _iclick = _iclick || [];
             return 0
         }
         return this.getCookie('_iclick_unique') ? 0 : 1
-    }, ld:function () {
-        if (!this.getCookie('_iclick_cookie')) {
-            return ''
-        }
-        return this.getCookie('_iclick_ld')
     }, screenWidth:function () {
         try {
             return screen.width

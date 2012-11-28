@@ -115,7 +115,7 @@ block script
                 pageSize = pageSize >=1 ? pageSize : 10;
             }
             $.ajax({
-                url: '/manage/statistics/companyCount',
+                url: '/manage/statistics/siteCount',
                 dataType: 'json',
                 data: {
                     pageNo: pageNo,
@@ -159,7 +159,7 @@ block script
                         trHtmls.push('</td>');
                         trHtmls.push('<td style="width: 100px;text-align: center;">');
                         trHtmls.push('<button type="button" data-site-id="');
-                        trHtmls.push(item.acId);
+                        trHtmls.push(item.siteId);
                         trHtmls.push('" data-date="');
                         trHtmls.push(item.day);
                         trHtmls.push('" data-company-name="');
@@ -181,7 +181,7 @@ block script
                     $('#pageCompany').text(companyName);
                     $('#pageList').empty().html('<li>正在载入...</li>');
                     $.ajax({
-                        url: '/manage/statistics/companyPages',
+                        url: '/manage/statistics/sitePage',
                         dataType: 'json',
                         data: {
                             date: date,

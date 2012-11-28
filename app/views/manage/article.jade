@@ -94,7 +94,7 @@ block script
             }
             var item = $.data(tr,'item');
             $('#tzydtTitle').val(item.title);
-            $('#tzydtTargetUrl').val(item.targetUrl);
+            $('#tzydtTargetUrl').val(item.url);
             $('#tzydtHighlight')[0].checked = item.highlight;
             $('#tzydtQa')[0].checked = item.qa;
 
@@ -123,7 +123,7 @@ block script
             }
             param = $.extend(param,{
                 title: title,
-                targetUrl: targetUrl,
+                url: targetUrl,
                 highlight: highlight ? 1: 0,
                 qa: qa ? 1: 0
             });
@@ -237,7 +237,7 @@ block script
                     trHtmls.push('</td>');
                     trHtmls.push('<td>');
                     trHtmls.push('<a  href="');
-                    trHtmls.push(item.targetUrl);
+                    trHtmls.push(item.url);
                     trHtmls.push('" ');
                     trHtmls.push('" target="_blank" ');
                     if(item.highlight){

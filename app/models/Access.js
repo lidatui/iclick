@@ -4,6 +4,7 @@ var AccessSchema = new Schema({
     ipInfo: {type: Schema.Types.Mixed},
     pageInfo: {type: Schema.Types.Mixed},
     agent: {type: Schema.Types.Mixed},
-    accessControl: {type: Schema.Types.Mixed}
+    site: {type: Schema.Types.Mixed},
+    timestamp: {type: String, trim: true}
 });
 mongoose.model('Access', AccessSchema);

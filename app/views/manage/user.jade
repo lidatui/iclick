@@ -67,7 +67,7 @@ block body
                                             span 内容管理
                                         label.checkbox
                                             input#userRoleAccessControl(type="checkbox")
-                                            span 访问控制
+                                            span 生成链接
                                         label.checkbox
                                             input#userRoleTemplate(type="checkbox")
                                             span 模版
@@ -113,7 +113,7 @@ block script
                 var item = $.data(tr,'item');
                 $('#userLoginName').val(item.loginName);
                 $('#userRoleArticle')[0].checked = item.role.article;
-                $('#userRoleAccessControl')[0].checked = item.role.accessControl;
+                $('#userRoleAccessControl')[0].checked = item.role.site;
                 $('#userRoleTemplate')[0].checked = item.role.template;
                 $('#userRoleStatistics')[0].checked = item.role.statistics;
                 $('#userRoleUser')[0].checked = item.role.user;
@@ -153,7 +153,7 @@ block script
                     loginName: loginName,
                     role: {
                         article: roleArticle ? 1: 0,
-                        accessControl: roleAccessControl ? 1: 0,
+                        site: roleAccessControl ? 1: 0,
                         template: roleTemplate ? 1: 0,
                         statistics: roleStatistics ? 1: 0,
                         user: roleUser ? 1: 0,
@@ -274,8 +274,8 @@ block script
                     if(item.role.article){
                         trHtmls.push('内容管理 ');
                     }
-                    if(item.role.accessControl){
-                        trHtmls.push('访问控制 ');
+                    if(item.role.site){
+                        trHtmls.push('生成链接 ');
                     }
                     if(item.role.template){
                         trHtmls.push('模版 ');

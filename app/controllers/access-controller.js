@@ -1,185 +1,84 @@
-
 module.exports = function(app){
     var DateUtils = require('../utils/DateUtils');
-    var http = require('http');
-    var handlebars = require("handlebars");
-    var dateFormat = require('dateformat');
-    var useragent = require('useragent');
-    var fs = require('fs');
-    var url = require('url');
-
-    var IpInfo = mongoose.model('IpInfo');
     var Access = mongoose.model('Access');
-    var Article = mongoose.model('Article');
-    var AccessControl = mongoose.model('AccessControl');
-    app.get('/show', function(req, res, next){
-        var access = new Access();
-        req.query['access'] = access;
-        //访问权限
-        if(!req.query['h']){
-            res.jsonp({ result: "<div style='display: none;'>您没有权限访问!</div>" });
-            return;
-        }
-        access.pageInfo = req.query['h'];
-        access.pageInfo['at'] = formatTime(new Date());
-        access.host = getHostname(access.pageInfo.resource);
-        AccessControl
-            .findById(access.pageInfo.site_id)
-            .populate('template')
-            .exec(function (err, ac) {
-                if (err) return next(err);
-                if(ac){
-                    req.query['template'] = ac.template;
-                    access.accessControl = ac;
-                    next();
-                }else{
-                    res.jsonp({ result: "<div style='display: none;'>您没有权限访问!</div>" });
-                }
-            });
 
-    },function(req, res, next){
-       //查找ip位置
-        var access = req.query['access'];
-
-        var  ipAddress = req.headers['x-cluster-client-ip'] ;
-        if(!ipAddress){
-            ipAddress = req.connection.remoteAddress;
-        }
-        access.ip = ipAddress;
-        var ipNum = dot2num(ipAddress);
-        IpInfo.findOne({startNum:{ $lte: ipNum},endNum:{$gte: ipNum}}, function(err, ipInfo){
-            if(err) return next(err);
-            if(ipInfo){
-                access.ipInfo = ipInfo;
+    function access(req, res, next){
+        if(req.session.user){
+            if (req.session.user.role.access) {
                 next();
-            }else{
-                var options = {
-                    host: 'int.dpool.sina.com.cn',
-                    port: 80,
-                    path: '/iplookup/iplookup.php?format=json&ip='+ipAddress,
-                    method: 'POST'
-                };
-                http.request(options,function(reqLookup) {
-                    bodyParser(reqLookup,function(ipData){
-                        var ipResult = JSON.parse(ipData);
-                        //console.log('ip lookup: %s',ipData);
-                        if(ipResult.ret != -1){
-                            var newIpInfo = new IpInfo(ipResult);
-                            newIpInfo.startNum = dot2num(ipResult.start);
-                            newIpInfo.endNum = dot2num(ipResult.end);
-                            newIpInfo.save(function(err){
-                                if(err) return next(err);
-                                access.ipInfo = newIpInfo;
-                                next();
-                            });
-                        }else{
-                            next();
-                        }
-                    })
-                }).on('error', function(err) {
-                    console.log('problem with request: ' + err.message);
-                    next(err);
-                }).end();
+            } else {
+                req.session.error = '无此权限!';
+                res.redirect('/');
             }
-        });
-    },function(req, res, next){
-        //获得操作系统和浏览器
-        var access = req.query['access'];
-        var agent = useragent.parse(req.headers['user-agent']);
-        access.agent = agent;//'{"family":"Chrome","major":"15","minor":"0","patch":"874","os":"Mac OS X"}'
-        next();
-    },function(req, res, next){
-        //存储
-        //console.log('access: %s',req.query['access']);
-        var access = req.query['access'];
-        access.save(function(err){
-            if(err) return next(err);
-            next();
-        });
-    },function(req, res){
-        //渲染模版，返回结果
-        var selectedTpl = req.query['template'];
-        var tpl = fs.readFileSync(__dirname.substr(0,__dirname.length-15) + 'static/tpl/'+selectedTpl.path,'utf-8');
-        var template = handlebars.compile(tpl);
-        Article
-            .findOne({})
-            .sort('-_id')
-            .exec(function (err, article) {
-                if(article){
-                    var model = article.toObject();
-                    model.basePath = 'http://iclick.cloudfoundry.com';
-                    model.pubDate = dateFormat(model.pubDate,'mm-dd');
-                    var tu = model.basePath + '/redirect?id='+model._id;
-                    if(article.qa){
-                        if(req.query['i']){
-                            tu += "&i="+new Buffer(new Buffer(req.query['i']).toString('ascii')).toString('base64');
-                        }
-                        if(req.query['r']){
-                            tu += "&r="+req.query['r'];
-                        }
-                    }
-                    model.targetUrl =tu;
-                    var result = template(model);
-                    res.jsonp({ result: result });
-                }else{
-                    res.jsonp({ result: '无内容' });
-                }
-            });
-
-        if(!app.qph){
-            app.qph = 1;
-            return;
+        }else {
+            req.session.error = '您的登陆状态已过期，请重新登录!';
+            res.redirect('/');
         }
-        app.qph++;
+
+    }
+
+    app.get('/manage/access',access, function(req, res){
+        res.render('manage/access', {
+            title : '投资一点通-访问记录'
+            ,description: 'access Description'
+            ,author: 'miemiedev'
+            ,l1: false,l2: false,l3: false,l4: false,l5: false,l6: true
+        });
     });
 
-    //IP转数字
-    function dot2num(dot) {
-        var parts = dot.split(".");
-        var res = 0;
-
-        res += (parseInt(parts[0], 10) << 24) >>> 0;
-        res += (parseInt(parts[1], 10) << 16) >>> 0;
-        res += (parseInt(parts[2], 10) << 8) >>> 0;
-        res += parseInt(parts[3], 10) >>> 0;
-
-        return res;
-    }
-    //数字转IP
-    function num2dot(num) {
-        var part1 = num & 255;
-        var part2 = ((num >> 8) & 255);
-        var part3 = ((num >> 16) & 255);
-        var part4 = ((num >> 24) & 255);
-
-        return part4 + "." + part3 + "." + part2 + "." + part1;
-    }
-
-    function getHostname(str) {
-        var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
-        var host = str.match(re)[1].toString().toLowerCase();
-        if(host.charAt(host.length-1) === '.'){
-            host = host.substr(0,host.length-1);
-        }
-        return host;
-    }
-    function bodyParser(res, next) {
-        var b = '';
-        res.setEncoding('utf-8');
-        res.on('data', function(data) {
-            b += data;
+    app.get('/manage/access/removeAll',access, function(req, res){
+        Access.remove({}).exec(function(err,obj){
+            res.render('manage/access', {
+                title : '访问记录'
+                ,description: 'access Description'
+                ,author: 'miemiedev'
+                ,l1: false,l2: false,l3: false,l4: false,l5: false,l6: true
+            });
         });
-        res.on('end', function() {res
-            next(b);
-        });
-    };
+    });
 
-    function formatTime(d){
-        var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
-        var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-        var hour = d.getHours() < 10 ? '0'+ d.getHours(): d.getHours();
-        var m = d.getMinutes() < 10 ? '0'+ d.getMinutes(): d.getMinutes();
-        var s = d.getSeconds() < 10 ? '0'+ d.getSeconds(): d.getSeconds();
-        return d.getFullYear()+'-'+ month +'-'+ date + ' ' +hour+':'+m+':'+s;
-    }
+    app.get('/manage/access/list',access, function(req, res){
+        var pageSize = req.query["pageSize"] > 0 ? req.query["pageSize"] : 10
+            , pageNo = req.query["pageNo"] > 0 ? req.query["pageNo"] : 0;
+        var now = DateUtils.now();
+        var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+        var startId = DateUtils.objectId(startDate);
+
+        Access
+            .find({'_id': {$gte: startId}})
+            .limit(pageSize)
+            .skip(pageSize * pageNo)
+            .sort('-_id')
+            .exec(function (err, accesses) {
+                Access.count({'_id': {$gte: startId}}).exec(function (err, count) {
+                    var results = accesses.map(function(access){
+                        return {
+                            id: access._id,
+                            timestamp: access.timestamp,
+                            ip: access.ip,
+                            country: access.ipInfo ? access.ipInfo.country : '',
+                            province: access.ipInfo ? access.ipInfo.province : '',
+                            city: access.ipInfo ? access.ipInfo.city : '',
+                            district: access.ipInfo ? access.ipInfo.district : '',
+                            isp: access.ipInfo ? access.ipInfo.isp : '',
+                            desc: access.ipInfo ? access.ipInfo.desc : '',
+                            url: access.pageInfo ? access.pageInfo.resource : '',
+                            siteName: access.site ? access.site.siteName : '',
+                            os: access.agent ? access.agent.os : access.os,
+                            browser: access.agent ? access.agent.family+' '+ access.agent.major+'.'+access.agent.minor+'.'+access.agent.patch : access.browser
+                        } ;
+                    });
+
+                    res.send({
+                        items: results
+                        , pageNo: pageNo
+                        , totalCount: count
+                        , pageSize: pageSize
+                    });
+                })
+
+            })
+    });
+
+
 }

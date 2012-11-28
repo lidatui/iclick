@@ -1,7 +1,7 @@
 
 var SiteDayCountSchema = new Schema({
-    acId: {type: Schema.ObjectId, ref: 'AccessControl'},
-    time: {type: String, default: '', trim: true},
+    dataTime: {type: Date},
+    site: {type: Schema.ObjectId, ref: 'Site'},
     count: {type: Number, default: 0}
 });
 mongoose.model('SiteDayCount', SiteDayCountSchema);

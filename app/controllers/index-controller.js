@@ -32,7 +32,7 @@ module.exports = function(app){
                             locked: 0,
                             role:{
                                 article: 1,
-                                accessControl: 1,
+                                site: 1,
                                 template: 1,
                                 statistics: 1,
                                 user: 1,
