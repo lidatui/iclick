@@ -15,7 +15,8 @@ module.exports = function(){
 
         var startId = DateUtils.objectId(startTime);
         var endId = DateUtils.objectId(endTime);
-
+        console.log('startid:'+startId);
+        console.log('endId:'+endId);
         var o = {
             map: function(){
                 emit({
@@ -44,7 +45,7 @@ module.exports = function(){
                 });
                 model
                     .find({'_id.site': {$in: siteIds}}, function(err, results) {
-
+                        console.log('SiteHourCount count: %s',results.length);
                         for(var j=0; j<results.length; j++){
 
                             var hourCount = new SiteHourCount({
@@ -52,9 +53,11 @@ module.exports = function(){
                                 time: new Date(results[j]._id['time']),
                                 count: results[j].value.count
                             });
-                            hourCount.save();
+                            hourCount.save(function(err, r){
+                                console.log(r);
+                            });
                         }
-                        console.log('SiteHourCount scheduler done...%s',DateUtils.format(startTime,'yyyy-mm-dd'));
+                        console.log('SiteHourCount scheduler done...%s',DateUtils.format(startTime,'yyyy-mm-dd HH:MM:ss'));
 
                     })
             });
