@@ -32,7 +32,7 @@ module.exports = function(app){
 
         var list = [];
         function callback(){
-
+            //合并相同天的记录
             var results = [];
             for(var i=0; i<list.length; i++){
                 var r = null;
@@ -48,9 +48,9 @@ module.exports = function(app){
                 }
 
             }
-
+            //从小到大排序
             results.sort(function(a,b){
-                return a['_id'] - b['_id'];
+                return a['_id'] > b['_id'];
             });
 
             var date = [];
@@ -78,20 +78,34 @@ module.exports = function(app){
             var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
             var endDate = new Date (startDate);
             startDate.setMonth(startDate.getMonth() -1);
+            startDate.setDate(startDate.getDate() +1);
 
             //取天表
-            SiteDayCount.find({'site':{$in: siteIds},'dataTime': {$gte: startDate,$lt: endDate}}, function(err, dayCounts){
-
-                dayCounts.forEach(function(dayCount){
-                    var d = dayCount.dataTime;
+            var o = {
+                map : function (){
+                    var d = this.dataTime;
                     var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
                     var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
                     var time = d.getFullYear()+'-'+ month +'-'+ date;
-                    list.push({
-                        _id: time,
-                        value: dayCount.count
-                    });
-                });
+
+                    emit(time, this.count);
+                }
+                , reduce: function (k, vals) {
+                    var total = 0;
+                    for ( var i=0; i<vals.length; i++ )
+                        total += vals[i];
+                    return total;
+                }
+                , query : {
+                    'site':{$in: siteIds}
+                    , 'dataTime': {$gte: startDate,$lt: endDate}
+                }
+            };
+            SiteDayCount.mapReduce(o, function(err, dayCounts){
+                dayCounts = dayCounts ? dayCounts : [];
+                for(var i=0; i< dayCounts.length; i++){
+                    list.push(dayCounts[i]);
+                }
                 if(--wait == 0){
                     callback();
                 }
@@ -109,7 +123,7 @@ module.exports = function(app){
                     var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
                     var time = d.getFullYear()+'-'+ month +'-'+ date;
 
-                    emit(time, 1);
+                    emit(time, this.count);
                 }
                 , reduce: function (k, vals) {
                     var total = 0;

@@ -1,0 +1,16 @@
+--- 
+applications: 
+  .: 
+    name: iclick
+    instances: 1
+    url: ${name}.${target-base}
+    services: 
+      mongodb-iclick: 
+        type: mongodb
+    mem: 256M
+    framework: 
+      name: node
+      info: 
+        description: Node.js Application
+        exec: 
+        mem: 64M
