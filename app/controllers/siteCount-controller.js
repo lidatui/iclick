@@ -49,12 +49,9 @@ module.exports = function(app){
 
         var o = {
             map: function(){
-                if(this.pageInfo && this.pageInfo.at){
-                    emit({
-                        day:this.timestamp.substr(0,10),site: this.site._id
-                    },{count: 1});
-                }
-
+                emit({
+                    day:this.timestamp.substr(0,10),site: this.site._id
+                },{count: 1});
             },
             reduce: function(k, vals){
                 var total = 0;
@@ -100,8 +97,8 @@ module.exports = function(app){
                                     var item = {
                                         siteId: sites[i]._id,
                                         day: results[j]._id['day'],
-                                        companyName: acs[i].companyName,
-                                        siteName: acs[i].siteName,
+                                        companyName: sites[i].companyName,
+                                        siteName: sites[i].siteName,
                                         count: results[j].value.count
                                     }
                                     items.push(item);

@@ -3,6 +3,7 @@ module.exports = function(app){
     var DateUtils = require('../utils/DateUtils');
     var Access = mongoose.model('Access');
     var Site = mongoose.model('Site');
+    var GisInfo = mongoose.model('GisInfo');
 
     function statistics(req, res, next){
         if(req.session.user){
