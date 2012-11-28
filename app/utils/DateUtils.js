@@ -21,7 +21,6 @@ module.exports = {
         if (typeof(timestamp) == 'string') {
             timestamp = new Date(timestamp);
         }
-        console.log(timestamp)
         var localTime = timestamp.getTime();
         var localOffset= timestamp.getTimezoneOffset()*60000;
         var utc = localTime + localOffset;
