@@ -116,25 +116,9 @@ module.exports = function(app){
             startDate = new Date(endDate);
             endDate = new Date(now.getFullYear(),now.getMonth(),now.getDate(),now.getHours(),0,0);
 
-            var o = {
-                map : function (){
-                    var d = this.dataTime;
-                    var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
-                    var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
-                    var time = d.getFullYear()+'-'+ month +'-'+ date;
-
-                    emit(time, this.count);
-                }
-                , reduce: function (k, vals) {
-                    var total = 0;
-                    for ( var i=0; i<vals.length; i++ )
-                        total += vals[i];
-                    return total;
-                }
-                , query : {
-                    'site':{$in: siteIds}
-                    , 'dataTime': {$gte: startDate,$lt: endDate}
-                }
+            o.query = {
+                'site':{$in: siteIds}
+                , 'dataTime': {$gte: startDate,$lt: endDate}
             };
             SiteHourCount.mapReduce(o, function(err, results){
                 results = results ? results : [];
