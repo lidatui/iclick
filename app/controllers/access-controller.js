@@ -1,6 +1,8 @@
 module.exports = function(app){
     var DateUtils = require('../utils/DateUtils');
     var Access = mongoose.model('Access');
+    var SiteHourCount = mongoose.model('SiteHourCount');
+    var SiteDayCount = mongoose.model('SiteDayCount');
 
     function access(req, res, next){
         if(req.session.user){
@@ -28,12 +30,17 @@ module.exports = function(app){
 
     app.get('/manage/access/removeAll',access, function(req, res){
         Access.remove({}).exec(function(err,obj){
-            res.render('manage/access', {
-                title : '访问记录'
-                ,description: 'access Description'
-                ,author: 'miemiedev'
-                ,l1: false,l2: false,l3: false,l4: false,l5: false,l6: true
+            SiteHourCount.remove({}).exec(function(err,obj){
+                SiteDayCount.remove({}).exec(function(err,obj){
+                    res.render('manage/access', {
+                        title : '访问记录'
+                        ,description: 'access Description'
+                        ,author: 'miemiedev'
+                        ,l1: false,l2: false,l3: false,l4: false,l5: false,l6: true
+                    });
+                })
             });
+
         });
     });
 

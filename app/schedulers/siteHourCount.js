@@ -15,8 +15,6 @@ module.exports = function(){
 
         var startId = DateUtils.objectId(startTime);
         var endId = DateUtils.objectId(endTime);
-        console.log('startid:'+startId);
-        console.log('endId:'+endId);
         var o = {
             map: function(){
                 emit({

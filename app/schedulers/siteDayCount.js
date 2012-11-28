@@ -43,7 +43,7 @@ module.exports = function(){
                 });
                 model
                     .find({'_id.site': {$in: siteIds}}, function(err, results) {
-
+                        console.log('SiteDayCount count: %s',results.length);
                         for(var j=0; j<results.length; j++){
 
                             var dayCount = new SiteDayCount({
@@ -51,7 +51,9 @@ module.exports = function(){
                                 dataTime: new Date(results[j]._id['time']),
                                 count: results[j].value.count
                             });
-                            dayCount.save();
+                            dayCount.save(function(err, r){
+                                console.log(r);
+                            });
                         }
                         console.log('SiteDayCount scheduler done...%s',DateUtils.format(startDate,'yyyy-mm-dd'));
 
