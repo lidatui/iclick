@@ -6,7 +6,7 @@ module.exports = function(){
     var AccessControl = mongoose.model('AccessControl');
     var SiteDayCount = mongoose.model('SiteDayCount');
     console.log('SiteDayCount scheduler loaded...');
-    new CronJob('0 0 16 * * *', function(){
+    new CronJob('0 0 0 * * *', function(){
         console.log('SiteDayCount scheduler start...');
         var now = DateUtils.now();
         var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());

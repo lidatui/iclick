@@ -378,8 +378,8 @@ module.exports = function(app){
 //                }
 //            });
             //最后一小时
-            startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate(),now.getHours());
-            startId = objectIdWithTimestamp(startDate);
+//            startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate(),now.getHours());
+//            startId = objectIdWithTimestamp(startDate);
             var o = {
                 map : function (){
                     if(this.pageInfo && this.pageInfo.at){
@@ -394,7 +394,7 @@ module.exports = function(app){
                 }
                 , query : {
                     'accessControl._id':{$in: acIds}
-                    , '_id': {$gte: startId}}
+                    , '_id': {$gte: endId}}
             };
             Access.mapReduce(o, function (err, results) {
                 results = results ? results : [];
