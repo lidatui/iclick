@@ -32,15 +32,32 @@ module.exports = function(app){
 
         var list = [];
         function callback(){
-            list.sort(function(a,b){
+
+            var results = [];
+            for(var i=0; i<list.length; i++){
+                var r = null;
+                for(var j=0; j<results.length; j++){
+                    if(list[i]._id === results[j]._id){
+                        r = results[j];
+                    }
+                }
+                if(r){
+                    r.value += list[i].value;
+                }else{
+                    results.push(list[i]);
+                }
+
+            }
+
+            results.sort(function(a,b){
                 return a['_id'] - b['_id'];
             });
 
             var date = [];
             var data = [];
-            for(var i=0; i< list.length; i++){
-                date.push(list[i]._id);
-                data.push(list[i].value);
+            for(var i=0; i< results.length; i++){
+                date.push(results[i]._id);
+                data.push(results[i].value);
             }
             res.send({
                 categories: date
@@ -55,7 +72,7 @@ module.exports = function(app){
                 return site._id;
             });
 
-            var wait = 2;
+            var wait = 3;
 
             var now = DateUtils.now();
             var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -64,9 +81,13 @@ module.exports = function(app){
             //取天表
             SiteDayCount.find({'site':{$in: siteIds},'dataTime': {$gte: startDate,$lt: startDate}}, function(err, dayCounts){
                 dayCounts.forEach(function(dayCount){
+                    var d = dayCount.dataTime;
+                    var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
+                    var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
+                    var time = d.getFullYear()+'-'+ month +'-'+ date;
                     list.push({
-                        _id: dayCount.time,
-                        value: dayCount
+                        _id: time,
+                        value: dayCount.count
                     });
                 });
                 if(--wait == 0){
@@ -74,6 +95,43 @@ module.exports = function(app){
                 }
             });
 
+
+            //取小时表
+            startDate = new Date(endDate);
+            endDate = new Date(now.getFullYear(),now.getMonth(),now.getDate(),now.getHours(),0,0);
+
+            var o = {
+                map : function (){
+                    var d = this.dataTime;
+                    var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
+                    var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
+                    var time = d.getFullYear()+'-'+ month +'-'+ date;
+
+                    emit(time, 1);
+                }
+                , reduce: function (k, vals) {
+                    var total = 0;
+                    for ( var i=0; i<vals.length; i++ )
+                        total += vals[i];
+                    return total;
+                }
+                , query : {
+                    'site':{$in: siteIds}
+                    , 'dataTime': {$gte: startDate,$lt: endDate}
+                }
+            };
+            SiteHourCount.mapReduce(o, function(err, results){
+                results = results ? results : [];
+                for(var i=0; i< results.length; i++){
+                    list.push(results[i]);
+                }
+                if(--wait == 0){
+                    callback();
+                }
+            });
+
+
+            //小时以后
             var o = {
                 map : function (){
                     emit(this.timestamp.substr(0,10), 1);

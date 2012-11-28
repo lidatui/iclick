@@ -48,7 +48,7 @@ module.exports = function(){
 
                             var hourCount = new SiteHourCount({
                                 site: results[j]._id['site'],
-                                time: new Date(results[j]._id['time']),
+                                dataTime: new Date(results[j]._id['time']),
                                 count: results[j].value.count
                             });
                             hourCount.save(function(err, r){
