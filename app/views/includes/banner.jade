@@ -12,7 +12,7 @@ nav.banner
                     li: a.selected(href='/manage/article') 内容管理
                 - else
                     li: a(href='/manage/article') 内容管理
-            - if (session.user.role.accessControl)
+            - if (session.user.role.site)
                 - if (l3)
                     li: a.selected(href='/manage/site') 生成链接
                 - else

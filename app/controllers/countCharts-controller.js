@@ -78,8 +78,10 @@ module.exports = function(app){
             var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
             var endDate = new Date (startDate);
             startDate.setMonth(startDate.getMonth() -1);
+
             //取天表
-            SiteDayCount.find({'site':{$in: siteIds},'dataTime': {$gte: startDate,$lt: startDate}}, function(err, dayCounts){
+            SiteDayCount.find({'site':{$in: siteIds},'dataTime': {$gte: startDate,$lt: endDate}}, function(err, dayCounts){
+
                 dayCounts.forEach(function(dayCount){
                     var d = dayCount.dataTime;
                     var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
