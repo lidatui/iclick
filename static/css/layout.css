@@ -1,3 +1,8 @@
+body {
+    width:100%;
+    min-width: 980px;
+}
+
 html,
 button,
 input,
