@@ -19,7 +19,28 @@ module.exports = function(app){
             if(user){
                 req.session.error = '';
                 req.session.user = user;
-                res.redirect('/manage/countCharts');
+                if(user.locked){
+                    req.session.error = '无法登陆';
+                    res.redirect('/');
+                    return;
+                }
+                if(user.role.statistics){
+                    res.redirect('/manage/countCharts');
+                }else if(user.role.article){
+                    res.redirect('/manage/article');
+                }else if(user.role.site){
+                    res.redirect('/manage/site');
+                }else if(user.role.template){
+                    res.redirect('/manage/template');
+                }else if(user.role.user){
+                    res.redirect('/manage/user');
+                }else if(user.role.access){
+                    res.redirect('/manage/access');
+                }else{
+                    req.session.error = '无法登陆';
+                    res.redirect('/');
+                }
+
             }else{
                 User.count().exec(function (err, count) {
                     if(count){
