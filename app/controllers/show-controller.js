@@ -45,6 +45,11 @@ module.exports = function(app){
         if(!ipAddress){
             ipAddress = req.connection.remoteAddress;
         }
+
+        if(ipAddress == '127.0.0.1' || !ipAddress){
+            return next();
+        }
+
         access.ip = ipAddress;
         var ipNum = dot2num(ipAddress);
         IpInfo.findOne({startNum:{ $lte: ipNum},endNum:{$gte: ipNum}}, function(err, ipInfo){
@@ -62,7 +67,7 @@ module.exports = function(app){
                 http.request(options,function(reqLookup) {
                     bodyParser(reqLookup,function(ipData){
                         var ipResult = JSON.parse(ipData);
-                        //console.log('ip lookup: %s',ipData);
+                        console.log('ip lookup: %s',ipData);
                         if(ipResult.ret != -1){
                             var newIpInfo = new IpInfo(ipResult);
                             newIpInfo.startNum = dot2num(ipResult.start);
