@@ -36,6 +36,8 @@ block body
                 button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
                 h3#detailChartsLabel 流量统计
             div.modal-body
+                div#loading(style='text-align: center;')
+                    img(src='/img/loading7.gif')
                 div#pieChart
             div.modal-footer
                 button.btn(data-dismiss="modal",aria-hidden="true") 关闭
@@ -133,6 +135,7 @@ block script
         });
 
         function showPieChart(date){
+            $('#loading').show();
             $('#pieChart').empty();
             $('#detailChartsLabel').text(date+'流量统计');
             $.ajax({
@@ -180,6 +183,7 @@ block script
                         enabled: false
                     }
                 });
+                $('#loading').hide();
             });
 
             $('#detailChartsModal').modal('show');

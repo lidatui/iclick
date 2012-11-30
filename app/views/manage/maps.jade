@@ -73,6 +73,7 @@ block body
                         option(value="#{site._id}") #{site.companyName}-#{site.siteName}
 
                 button#mapSubmit.btn.btn-small.btn-primary(type="button",style="margin-left:10px;") 查询
+                img#loading(src='/img/loading7.gif',width='30',height='30')
             div#map_canvas.maps
 
 block script
@@ -121,6 +122,8 @@ block script
         });
 
         function loadMapMarker(level){
+            $('#loading').show();
+            $('#mapSubmit').addClass('disabled');
             $.ajax({
                 url: '/manage/statistics/gisCount',
                 dataType: 'json',
@@ -141,6 +144,8 @@ block script
                     }
                 }
                 map.level = level;
+                $('#loading').hide();
+                $('#mapSubmit').removeClass('disabled');
             });
 
         }

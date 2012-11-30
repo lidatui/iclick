@@ -29,6 +29,7 @@ block body
                         option(value="#{site._id}") #{site.companyName}-#{site.siteName}
 
                 button#cpySubmit.btn.btn-small.btn-primary(type="button",style="margin-left:10px;") 查询
+                img#loading(src='/img/loading7.gif',width='30',height='30')
             table.table.table-bordered.table-striped
                 thead
                     tr
@@ -102,6 +103,9 @@ block script
 
 
         function loadCompany(pageNo, pageSize){
+            $('#loading').show();
+            $('#cpySubmit').addClass('disabled');
+
             $('#companyBody').empty().html('<tr><td colspan="6" style="text-align: center;">正在加载..</td></tr>');
             if(pageNo >= 0){
                 $('#companyPaginator').data('pageNo',pageNo);
@@ -211,6 +215,8 @@ block script
 
                     $('#pageListModal').modal('show');
                 });
+                $('#loading').hide();
+                $('#cpySubmit').removeClass('disabled');
             });
         }
 
