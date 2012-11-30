@@ -102,6 +102,7 @@ block script
 
 
         function loadCompany(pageNo, pageSize){
+            $('#companyBody').empty().html('<tr><td colspan="6" style="text-align: center;">正在加载..</td></tr>');
             if(pageNo >= 0){
                 $('#companyPaginator').data('pageNo',pageNo);
             }else{
