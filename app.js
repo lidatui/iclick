@@ -45,6 +45,7 @@ var socketiostore = new (require('socket.io-clusterhub'));
         app.set('view engine', 'jade');
         app.use(express.favicon());
         //app.use(express.logger('dev'));
+        app.use(express.compress());
         app.use(express.bodyParser());
         app.use(express.methodOverride());
         app.use(express.cookieParser('your secret here'));
@@ -53,7 +54,7 @@ var socketiostore = new (require('socket.io-clusterhub'));
             cookie: { path: '/manage', httpOnly: true,  maxAge: 1000 * 60 * 60},
             store: sessionStore
         }));
-        app.use(express.static(path.join(__dirname, '/static')));
+        app.use(express.static(path.join(__dirname, '/static'),{ maxAge: 1000 * 60 * 60 * 24 * 30 }));
         app.use(function(req, res, next){
             res.locals.session = req.session;
             next();
