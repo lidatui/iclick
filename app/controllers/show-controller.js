@@ -67,7 +67,7 @@ module.exports = function(app){
                 http.request(options,function(reqLookup) {
                     bodyParser(reqLookup,function(ipData){
                         var ipResult = JSON.parse(ipData);
-                        console.log('ip lookup: %s',ipData);
+                        //console.log('ip lookup: %s',ipData);
                         if(ipResult.ret != -1){
                             var newIpInfo = new IpInfo(ipResult);
                             newIpInfo.startNum = dot2num(ipResult.start);

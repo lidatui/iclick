@@ -198,7 +198,7 @@ module.exports = function(app){
                 callback(err,model ,stats);
             }
         });
-
+        //实时查询
         var o = {
             map: function(){
                 emit({
