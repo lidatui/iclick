@@ -171,8 +171,8 @@ module.exports = function(app){
             reduce: reduceFunc,
             out: {reduce: tempColName},//增量放入
             verbose: true,
-            query: siteId ? { 'site._id':mongoose.Types.ObjectId(siteId), 'dataTime': {$gte: startDate,$lt: endDate}}
-                : {'dataTime': {$gte: startDate,$lt: endDate}}
+            query: siteId ? { 'site._id':mongoose.Types.ObjectId(siteId),  '_id': {$gte: DateUtils.objectId(endDate)}}
+                : { '_id': {$gte: DateUtils.objectId(endDate)}}
         };
         Access.mapReduce(o,function(err, model, stats){
             if(--wait == 0){
