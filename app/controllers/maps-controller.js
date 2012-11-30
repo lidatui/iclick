@@ -110,7 +110,7 @@ module.exports = function(app){
         var o = {
             map: map,
             reduce: reduceFunc,
-            out: tempColName,
+            out: {reduce: tempColName},
             verbose: true,
             query: siteId ? {'site':siteId, 'dataTime': {$gte: startDate,$lt: endDate}}
                 : {'dataTime': {$gte: startDate,$lt: endDate}}

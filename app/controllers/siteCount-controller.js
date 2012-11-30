@@ -157,7 +157,7 @@ module.exports = function(app){
                 emit({day:day,site: this.site},{count: this.count});
             },
             reduce: reduceFunc,
-            out: tempColName,
+            out: {reduce: tempColName},
             verbose: true,
             query: siteId ? {'site':siteId, 'dataTime': {$gte: startDate,$lt: endDate}}
                     : {'dataTime': {$gte: startDate,$lt: endDate}}
