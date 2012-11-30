@@ -52,7 +52,7 @@ module.exports = function(){
                                 count: results[j].value.count
                             });
                             dayCount.save(function(err, r){
-                                console.log(r);
+                                //console.log(r);
                             });
                         }
                         console.log('SiteDayCount scheduler done...%s',DateUtils.format(startDate,'yyyy-mm-dd'));

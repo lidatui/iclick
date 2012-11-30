@@ -52,7 +52,7 @@ module.exports = function(){
                                 count: results[j].value.count
                             });
                             hourCount.save(function(err, r){
-                                console.log(r);
+                                //console.log(r);
                             });
                         }
                         console.log('SiteHourCount scheduler done...%s',DateUtils.format(startTime,'yyyy-mm-dd HH:MM:ss'));
