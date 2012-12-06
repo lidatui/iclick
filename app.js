@@ -11,8 +11,7 @@ var express = require('express')
 
 
 var cluster = require('cluster');
-var numCPUs = require('os').cpus().length;
-var socketiostore = new (require('socket.io-clusterhub'));
+var numCPUs = require('os').cpus().length
 
 //if (cluster.isMaster) {
 //    // Fork workers.
@@ -93,35 +92,6 @@ var socketiostore = new (require('socket.io-clusterhub'));
         console.log("Express server listening on port " + app.get('port'));
     });
 
-    //Setup Socket.IO
-    var io = io.listen(server);
-
-    io.enable('browser client etag');
-    io.set('log level', 1);
-    io.set('store', socketiostore);
-    //CF
-    if(process.env.VMC_APP_PORT) {
-        io.set('transports', [
-//            'websocket',
-            'flashsocket',
-            'htmlfile',
-            'xhr-polling',
-            'jsonp-polling'
-        ]);
-    }
-
-
-    var CronJob = require('cron').CronJob;
-    var qph = 0;
-    new CronJob('* * * * * *', function(){
-        qph = app.qph;
-        io.sockets.emit('qph', { count: qph});
-        app.qph = 0;
-    },null,true);
-
-    io.sockets.on('connection', function(socket){
-        socket.emit('qph', { count: qph});
-    });
 
 //    process.on('message', function(msg) {
 //        if(msg === 'schedulerRun'){

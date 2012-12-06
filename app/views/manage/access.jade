@@ -10,9 +10,7 @@ block body
             include ../includes/login
     div.main
         section
-            p 最近一天的访问记录.当前QPS：
-                span#qps(style="margin: 0 0 0 0;color:#b00;")
-                |次/秒
+            p 最近一天的访问记录.
             div.row-fluid
                 div.span12
                     table.table.table-bordered.table-striped.table-condensed
@@ -41,11 +39,6 @@ block script
     script(src='/js/datejs.js')
     script
         $(function () {
-            var qps = $('#qps');
-            var socket = io.connect();
-            socket.on('qph', function (data) {
-                qps.text(data.count);
-            });
             loadAccess(0,100);
         });
 

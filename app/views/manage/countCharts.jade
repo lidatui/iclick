@@ -31,14 +31,14 @@ block body
         section
             div#dayChart.chart
                 span.loading 正在载入，请稍后...
-        div#detailChartsModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="detailChartsLabel",aria-hidden="true",style="width:650px;")
+        div#detailChartsModal.modal.hide(tabindex="-1", role="dialog",aria-labelledby="detailChartsLabel",aria-hidden="true",style="width:640px;")
             div.modal-header
                 button.close(type="button",data-dismiss="modal",aria-hidden="true") ×
                 h3#detailChartsLabel 流量统计
             div.modal-body
                 div#loading(style='text-align: center;')
                     img(src='/img/loading7.gif')
-                div#pieChart
+                div#pieChart(style='width:600px;')
             div.modal-footer
                 button.btn(data-dismiss="modal",aria-hidden="true") 关闭
 
