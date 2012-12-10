@@ -50,7 +50,9 @@ module.exports = function(app){
             }
             //从小到大排序
             results.sort(function(a,b){
-                return a['_id'] > b['_id'];
+                if (a['_id'] < b['_id']) return -1;
+                if (a['_id'] > b['_id']) return 1;
+                return 0;
             });
 
             var date = [];
