@@ -87,11 +87,17 @@ block script
         $(function () {
             $('#mapStartDate').datepicker({
                 format: 'yyyy-mm-dd',
+                weekStart: 1,
+                endDate: new Date(),
+                autoclose: true,
                 language: 'zh-CN'
             });
             $('#mapStartDate').datepicker('setDate',new Date());
             $('#mapEndDate').datepicker({
                 format: 'yyyy-mm-dd',
+                weekStart: 1,
+                endDate: new Date(),
+                autoclose: true,
                 language: 'zh-CN'
             });
             $('#mapEndDate').datepicker('setDate',new Date());
