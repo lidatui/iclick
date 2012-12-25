@@ -11,7 +11,7 @@ module.exports = function(){
         var now = DateUtils.now();
         var startTime = new Date(now.getFullYear(),now.getMonth(),now.getDate(),now.getHours(),0,0);
         var endTime = new Date(startTime);
-        startTime.setHours(startTime.getHours() - 1);
+        startTime.setDate(startTime.getDate() - 1);
 
         var startId = DateUtils.objectId(startTime);
         var endId = DateUtils.objectId(endTime);
