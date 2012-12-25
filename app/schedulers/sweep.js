@@ -8,7 +8,8 @@ module.exports = function(){
         console.log('Sweep scheduler start...');
         var now = DateUtils.now();
         var startDate = new Date(now.getFullYear(),now.getMonth(),now.getDate());
-        startDate.setFullYear(startDate.getFullYear() - 1);
+        //startDate.setFullYear(startDate.getFullYear() - 1);
+        startDate.setDate(startDate.getDate() - 3);
         var startId = DateUtils.objectId(startDate);
         //清理一年前的数据
         Access.remove({'_id': {$lt: startId}},function(err,count){
