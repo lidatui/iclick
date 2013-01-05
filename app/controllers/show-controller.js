@@ -175,7 +175,7 @@ module.exports = function(app){
     };
 
     function formatTime(d){
-        var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
+        var month = d.getMonth()+1 < 10 ? '0'+ (d.getMonth()+1): d.getMonth()+1;
         var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
         var hour = d.getHours() < 10 ? '0'+ d.getHours(): d.getHours();
         var m = d.getMinutes() < 10 ? '0'+ d.getMinutes(): d.getMinutes();
