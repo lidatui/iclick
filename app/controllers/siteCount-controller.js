@@ -151,7 +151,7 @@ module.exports = function(app){
         var o = {
             map: function(){
                 var d = this.dataTime;
-                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
+                var month = d.getMonth()+1 < 10 ? '0'+ (d.getMonth()+1): d.getMonth()+1;
                 var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
                 var day = d.getFullYear()+'-'+ month +'-'+ date;
                 emit({day:day,site: this.site},{count: this.count});
@@ -180,7 +180,7 @@ module.exports = function(app){
         var o = {
             map: function(){
                 var d = this.dataTime;
-                var month = d.getMonth()+1 < 10 ? '0'+ d.getMonth()+1: d.getMonth()+1;
+                var month = d.getMonth()+1 < 10 ? '0'+ (d.getMonth()+1): d.getMonth()+1;
                 var date = d.getDate() < 10 ? '0'+ d.getDate(): d.getDate();
                 var day = d.getFullYear()+'-'+ month +'-'+ date;
                 emit({
