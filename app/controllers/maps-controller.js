@@ -189,9 +189,9 @@ module.exports = function(app){
                 callback(null, gi);
             }else{
                 var options = {
-                    host: 'maps.google.com',
+                    host: 'maps.googleapis.com',
                     port: 80,
-                    path: '/maps/geo?q='+name,
+                    path: '/maps/api/geocode/json?sensor=false&address='+name,
                     method: 'POST'
                 };
                 http.request(options,function(res) {
@@ -199,12 +199,12 @@ module.exports = function(app){
                         try{
                             var resultData = JSON.parse(data);
                             var gisInfo = null;
-                            if(resultData && resultData.Placemark && resultData.Placemark.length != 0 && resultData.Placemark[0].Point && resultData.Placemark[0].Point.coordinates){
-                                var coordinates = resultData.Placemark[0].Point.coordinates;
+                            if(resultData && resultData.results && resultData.results.length >0 && resultData.results[0].geometry && resultData.results[0].geometry.location){
+                                var coordinates = resultData.results[0].geometry.location;
                                 gisInfo = new GisInfo({
                                     name: name,
-                                    lng: coordinates[0],
-                                    lat: coordinates[1],
+                                    lng: coordinates.lng,
+                                    lat: coordinates.lat,
                                     level: level
                                 });
                                 gisInfo.save(function(err){

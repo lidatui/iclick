@@ -41,7 +41,7 @@ module.exports = function(app){
        //查找ip位置
         var access = req.query['access'];
 
-        var  ipAddress = req.headers['x-cluster-client-ip'] ;
+        var  ipAddress = req.headers['x-forwarded-for'] ;
         if(!ipAddress){
             ipAddress = req.connection.remoteAddress;
         }
@@ -66,20 +66,26 @@ module.exports = function(app){
                 };
                 http.request(options,function(reqLookup) {
                     bodyParser(reqLookup,function(ipData){
-                        var ipResult = JSON.parse(ipData);
-                        //console.log('ip lookup: %s',ipData);
-                        if(ipResult.ret != -1){
-                            var newIpInfo = new IpInfo(ipResult);
-                            newIpInfo.startNum = dot2num(ipResult.start);
-                            newIpInfo.endNum = dot2num(ipResult.end);
-                            newIpInfo.save(function(err){
-                                if(err) return next(err);
-                                access.ipInfo = newIpInfo;
+                        try{
+                            var ipResult = JSON.parse(ipData);
+                            //console.log('ip lookup: %s',ipData);
+                            if(ipResult.ret != -1){
+                                var newIpInfo = new IpInfo(ipResult);
+                                newIpInfo.startNum = dot2num(ipResult.start);
+                                newIpInfo.endNum = dot2num(ipResult.end);
+                                newIpInfo.save(function(err){
+                                    if(err) return next(err);
+                                    access.ipInfo = newIpInfo;
+                                    next();
+                                });
+                            }else{
                                 next();
-                            });
-                        }else{
-                            next();
+                            }
+                        }catch (e) {
+                            console.log('problem with request: ' + e);
+                            next(e);
                         }
+
                     })
                 }).on('error', function(err) {
                     console.log('problem with request: ' + err.message);
