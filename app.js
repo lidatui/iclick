@@ -9,6 +9,10 @@ var express = require('express')
   , io = require('socket.io')
   , path = require('path');
 
+var https = require('https');
+var privateKey  = fs.readFileSync('key.pem');
+var certificate = fs.readFileSync('key-cert.pem');
+var credentials = {key: privateKey, cert: certificate};
 
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length
@@ -89,9 +93,13 @@ var numCPUs = require('os').cpus().length
         res.send(500, 'Something broke!');
     });
 
-    var server = http.createServer(app).listen(app.get('port'), function(){
-        console.log("Express server listening on port " + app.get('port'));
-    });
+    var httpsServer = https.createServer(credentials, app).listen(app.get('port'), function(){
+      console.log("Express server listening on port " + app.get('port'));
+    });;
+
+//    var server = http.createServer(app).listen(app.get('port'), function(){
+//        console.log("Express server listening on port " + app.get('port'));
+//    });
 
 
 //    process.on('message', function(msg) {
