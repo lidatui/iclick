@@ -118,7 +118,7 @@ module.exports = function(app){
             .exec(function (err, article) {
                 if(article){
                     var model = article.toObject();
-                    model.basePath = 'http://iclick.cloudfoundry.com';
+                    model.basePath = 'http://127.0.0.1:3000';
                     model.pubDate = dateFormat(model.pubDate,'mm-dd');
                     var tu = model.basePath + '/redirect?id='+model._id;
                     if(article.qa){
