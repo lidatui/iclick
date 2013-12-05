@@ -120,3 +120,7 @@ var numCPUs = require('os').cpus().length
 
 //}
 
+process.on('uncaughtException',function(e){
+  console.log(e.toString());
+});
+
