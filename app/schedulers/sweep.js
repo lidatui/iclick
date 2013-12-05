@@ -11,7 +11,7 @@ module.exports = function(){
         //startDate.setFullYear(startDate.getFullYear() - 1);
         //startDate.setDate(startDate.getDate() - 3);
 
-        startDate.setTime(startDate.getTime()-30*24*3600*1000);
+        startDate.setTime(startDate.getTime()-2*30*24*3600*1000);
         var startId = DateUtils.objectId(startDate);
         //清理一年前的数据
         Access.remove({'_id': {$lt: startId}},function(err,count){
