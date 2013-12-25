@@ -189,18 +189,18 @@ module.exports = function(app){
                 callback(null, gi);
             }else{
                 var options = {
-                    host: 'maps.googleapis.com',
+                    host: 'api.map.baidu.com',
                     port: 80,
-                    path: '/maps/api/geocode/json?sensor=false&address='+name,
-                    method: 'POST'
+                    path: '/geocoder?output=json&address='+name,
+                    method: 'GET'
                 };
                 http.request(options,function(res) {
                     bodyParser(res, function(data){
                         try{
                             var resultData = JSON.parse(data);
                             var gisInfo = null;
-                            if(resultData && resultData.results && resultData.results.length >0 && resultData.results[0].geometry && resultData.results[0].geometry.location){
-                                var coordinates = resultData.results[0].geometry.location;
+                            if(resultData && resultData.status=='OK' && resultData.result && resultData.result.location){
+                                var coordinates = resultData.result.location;
                                 gisInfo = new GisInfo({
                                     name: name,
                                     lng: coordinates.lng,
